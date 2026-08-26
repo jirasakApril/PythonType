@@ -1,0 +1,1550 @@
+from flask import Flask
+
+app = Flask(__name__)
+
+HTML_CODE = """
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Python Typing Test - Liquid Glass Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --theme-color: #00ff66;
+            --theme-glow: rgba(0, 255, 102, 0.35);
+            --theme-dim: rgba(0, 255, 102, 0.1);
+            --glass-bg: rgba(13, 20, 16, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), inset 0 1px 2px 0 rgba(255, 255, 255, 0.25);
+        }
+        body.theme-blue {
+            --theme-color: #2563eb;
+            --theme-glow: rgba(37, 99, 235, 0.35);
+            --theme-dim: rgba(37, 99, 235, 0.1);
+            --glass-bg: rgba(10, 20, 30, 0.45);
+        }
+        body.theme-gray {
+            --theme-color: #e0e0e0;
+            --theme-glow: rgba(224, 224, 224, 0.35);
+            --theme-dim: rgba(224, 224, 224, 0.1);
+            --glass-bg: rgba(25, 25, 25, 0.45);
+        }
+        body.theme-pink {
+            --theme-color: #ff66b2;
+            --theme-glow: rgba(255, 102, 178, 0.35);
+            --theme-dim: rgba(255, 102, 178, 0.1);
+            --glass-bg: rgba(30, 10, 22, 0.45);
+        }
+
+        body {
+            font-family: 'Fira Code', monospace;
+            font-variant-ligatures: none;
+            background: radial-gradient(circle at 20% 20%, #0a1f12 0%, #030804 100%);
+            color: #e6edf3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+            transition: background 0.4s ease;
+        }
+
+        body.theme-blue { background: radial-gradient(circle at 20% 20%, #0c1a30 0%, #020617 100%); }
+        body.theme-gray { background: radial-gradient(circle at 20% 20%, #1f1f1f 0%, #050505 100%); }
+        body.theme-pink { background: radial-gradient(circle at 20% 20%, #2e051b 0%, #080306 100%); }
+
+        /* --- Click-to-Enter Intro Screen Styling --- */
+        .intro-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, rgba(5, 15, 8, 0.95) 0%, rgba(2, 5, 3, 0.98) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            cursor: pointer;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s ease;
+        }
+
+        .intro-screen.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .click-enter-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .click-enter-container h1 {
+            color: var(--theme-color);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.6rem;
+            margin-top: 0;
+            margin-bottom: 12px;
+            text-shadow: 0 0 25px var(--theme-glow);
+            letter-spacing: 1.5px;
+            min-height: 55px;
+        }
+
+        .click-enter-container p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-bottom: 0;
+            line-height: 1.6;
+            min-height: 30px;
+            opacity: 0.8;
+        }
+
+        /* เคอร์เซอร์กระพริบตอนพิมพ์ */
+        .typing-cursor {
+            display: inline-block;
+            background-color: var(--theme-color);
+            width: 10px;
+            height: 1.1em;
+            vertical-align: -2px;
+            margin-left: 3px;
+            animation: cursorBlink 0.8s infinite;
+            box-shadow: 0 0 10px var(--theme-color);
+        }
+
+        @keyframes cursorBlink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* --- Floating & Rotating UI Animation --- */
+        @keyframes floatAndRotate {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(0.35deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        .floating-ui {
+            animation: floatAndRotate 6s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(0, 0); }
+            20% { transform: translate(-6px, 2px); }
+            40% { transform: translate(6px, -2px); }
+            60% { transform: translate(-4px, -1px); }
+            80% { transform: translate(4px, 1px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .shake-effect { animation: shake 0.25s ease-in-out; }
+
+        @keyframes uiRedFlash {
+            0% { 
+                background-color: rgba(255, 0, 0, 0);
+                box-shadow: var(--glass-shadow);
+                border-color: var(--glass-border);
+            }
+            30% { 
+                background-color: rgba(255, 0, 0, 0.22);
+                box-shadow: var(--glass-shadow), 0 0 50px rgba(255, 0, 0, 0.85), inset 0 0 30px rgba(255, 0, 0, 0.6);
+                border-color: #ff4d4d;
+            }
+            100% { 
+                background-color: rgba(255, 0, 0, 0);
+                box-shadow: var(--glass-shadow);
+                border-color: var(--glass-border);
+            }
+        }
+
+        .red-flash-effect { animation: uiRedFlash 0.3s ease-in-out; }
+
+        .screen-flash-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 0, 0, 0);
+            pointer-events: none;
+            z-index: 999;
+            transition: background 0.1s ease;
+        }
+
+        @keyframes screenFlashAnim {
+            0% { background: rgba(255, 0, 0, 0); }
+            35% { background: rgba(255, 0, 0, 0.28); }
+            100% { background: rgba(255, 0, 0, 0); }
+        }
+
+        .screen-flash-active { animation: screenFlashAnim 0.3s ease-in-out; }
+
+        .matrix-bg-char {
+            position: fixed;
+            top: -30px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--theme-color);
+            text-shadow: 0 0 8px var(--theme-color);
+            user-select: none;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0.6;
+            animation: matrixFall linear forwards;
+        }
+
+        @keyframes matrixFall {
+            0% { transform: translateY(0); opacity: 0.7; }
+            100% { transform: translateY(105vh); opacity: 0; }
+        }
+
+        .menu-back-btn {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            font-family: 'Fira Code', monospace;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            color: #8b949e;
+            border: 1px solid var(--glass-border);
+            padding: 10px 18px;
+            font-size: 0.85rem;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 50;
+        }
+
+        .menu-back-btn:hover {
+            color: var(--theme-color);
+            border-color: var(--theme-color);
+            background: var(--theme-dim);
+            box-shadow: 0 0 20px var(--theme-glow), var(--glass-shadow);
+            transform: translateY(-2px);
+        }
+
+        .next-step-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            font-family: 'Fira Code', monospace;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            color: var(--theme-color);
+            border: 1.5px solid var(--theme-color);
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 0 25px var(--theme-glow), var(--glass-shadow);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .next-step-btn.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .next-step-btn:hover {
+            background-color: var(--theme-color);
+            color: #0d1117;
+            box-shadow: 0 0 35px var(--theme-glow), var(--glass-shadow);
+            transform: scale(1.05) translateY(-2px);
+        }
+
+        .stats-panel-right {
+            position: fixed;
+            top: 50%;
+            right: 25px;
+            transform: translateY(-50%) translateX(20px);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(200%);
+            -webkit-backdrop-filter: blur(20px) saturate(200%);
+            border: 1px solid var(--glass-border);
+            padding: 22px 25px;
+            border-radius: 20px;
+            box-shadow: var(--glass-shadow), 0 0 30px rgba(0, 0, 0, 0.4);
+            width: 330px;
+            z-index: 90;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stats-panel-right.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(-50%) translateX(0);
+        }
+
+        .stats-panel-right h3 {
+            color: var(--theme-color);
+            margin-top: 0;
+            margin-bottom: 14px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+            text-align: center;
+            text-shadow: 0 0 10px var(--theme-glow);
+        }
+
+        .stat-item {
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            color: #8b949e;
+        }
+
+        .stat-item span {
+            color: var(--theme-color);
+            font-weight: bold;
+        }
+
+        .menu-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, rgba(10, 20, 14, 0.85) 0%, rgba(3, 8, 4, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .menu-screen.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .terminal-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(200%);
+            -webkit-backdrop-filter: blur(24px) saturate(200%);
+            border: 1px solid var(--glass-border);
+            padding: 45px 55px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: var(--glass-shadow), 0 0 50px var(--theme-glow);
+            max-width: 520px;
+            width: 90%;
+            z-index: 10;
+        }
+
+        .terminal-box h1 {
+            color: var(--theme-color);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2rem;
+            margin-top: 0;
+            margin-bottom: 12px;
+            text-shadow: 0 0 15px var(--theme-glow);
+            letter-spacing: 1px;
+        }
+
+        .terminal-box p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .prog-btn {
+            font-family: 'Fira Code', monospace;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            color: var(--theme-color);
+            border: 1px solid var(--glass-border);
+            padding: 14px 0;
+            font-size: 1.05rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 1px;
+        }
+
+        .prog-btn:hover {
+            background-color: var(--theme-color);
+            color: #0d1117;
+            border-color: var(--theme-color);
+            box-shadow: 0 0 25px var(--theme-glow), var(--glass-shadow);
+            transform: scale(1.03) translateY(-2px);
+        }
+
+        .prog-btn:active, .next-step-btn:active, .menu-back-btn:active, .close-opt-btn:active {
+            transform: scale(0.94) translateY(3px) !important;
+            box-shadow: 0 0 10px var(--theme-glow), inset 0 3px 6px rgba(0, 0, 0, 0.6) !important;
+            filter: brightness(0.9);
+            transition: transform 0.06s ease, box-shadow 0.06s ease;
+        }
+
+        .prog-btn.exit-btn {
+            color: #ff6b6b;
+            border-color: rgba(255, 107, 107, 0.3);
+        }
+
+        .prog-btn.exit-btn:hover {
+            background-color: #ff6b6b;
+            color: #0d1117;
+            box-shadow: 0 0 25px rgba(255, 107, 107, 0.6), var(--glass-shadow);
+        }
+
+        .options-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .options-modal.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .options-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(200%);
+            -webkit-backdrop-filter: blur(24px) saturate(200%);
+            border: 1px solid var(--glass-border);
+            padding: 35px 45px;
+            border-radius: 24px;
+            width: 380px;
+            box-shadow: var(--glass-shadow), 0 0 40px var(--theme-glow);
+            text-align: left;
+        }
+
+        .options-content h2 {
+            color: var(--theme-color);
+            margin-top: 0;
+            margin-bottom: 22px;
+            font-size: 1.3rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 12px;
+            text-shadow: 0 0 10px var(--theme-glow);
+        }
+
+        .option-group { margin-bottom: 22px; }
+
+        .option-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            margin-bottom: 10px;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 56px;
+            height: 30px;
+            cursor: pointer;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(4px);
+        }
+
+        .switch:hover .slider {
+            border-color: var(--theme-color);
+            box-shadow: 0 0 14px var(--theme-glow);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #94a3b8;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s ease, box-shadow 0.3s ease, width 0.2s ease;
+            border-radius: 50%;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+        }
+
+        .switch:active .slider:before { width: 26px; }
+
+        input:checked + .slider {
+            background-color: var(--theme-dim);
+            border-color: var(--theme-color);
+            box-shadow: inset 0 0 10px var(--theme-glow);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+            background-color: var(--theme-color);
+            box-shadow: 0 0 16px var(--theme-color), 0 0 6px var(--theme-glow);
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+
+        input[type=range]:focus { outline: none; }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            border: 1px solid var(--glass-border);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        input[type=range]:hover::-webkit-slider-runnable-track {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: var(--theme-color);
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: var(--theme-color);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -8px;
+            box-shadow: 0 0 12px var(--theme-glow);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, box-shadow 0.25s ease;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+            box-shadow: 0 0 22px var(--theme-color), 0 0 10px var(--theme-glow);
+        }
+
+        input[type=range]::-webkit-slider-thumb:active {
+            transform: scale(0.9);
+            box-shadow: 0 0 6px var(--theme-color);
+        }
+
+        .close-opt-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px 0;
+            background: var(--theme-dim);
+            color: var(--theme-color);
+            border: 1px solid var(--theme-color);
+            border-radius: 12px;
+            font-family: 'Fira Code', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: var(--glass-shadow);
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .close-opt-btn:hover {
+            background: var(--theme-color);
+            color: #0d1117;
+            box-shadow: 0 0 20px var(--theme-glow), var(--glass-shadow);
+            transform: translateY(-2px);
+        }
+
+        .app-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            background: rgba(3, 8, 4, 0.2);
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        .app-screen.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        h1.main-title {
+            margin-bottom: 4px;
+            font-size: 1.8rem;
+            color: var(--theme-color);
+            text-shadow: 0 0 15px var(--theme-glow);
+            z-index: 10;
+        }
+
+        .snippet-badge {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            color: var(--theme-color);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 14px;
+            box-shadow: var(--glass-shadow);
+            z-index: 10;
+        }
+
+        .instructions {
+            color: #94a3b8;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .target-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(200%);
+            -webkit-backdrop-filter: blur(24px) saturate(200%);
+            padding: 24px 32px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            letter-spacing: 0px;
+            margin-bottom: 16px;
+            border: 1px solid var(--glass-border);
+            max-width: 850px;
+            width: 85%;
+            text-align: left;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-family: 'Fira Code', monospace;
+            box-shadow: var(--glass-shadow), 0 0 30px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            min-height: 60px;
+            display: block;
+            line-height: 1.7;
+            transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        .char { color: #64748b; }
+        .char.correct {
+            color: var(--theme-color);
+            text-shadow: 0 0 8px var(--theme-glow);
+        }
+        .char.incorrect {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.2);
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+            border-radius: 4px;
+        }
+        .char.current {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 2.5px solid #ffffff;
+            border-radius: 2px;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        .secret-output-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px dashed var(--theme-color);
+            padding: 14px 22px;
+            border-radius: 16px;
+            margin-bottom: 18px;
+            max-width: 850px;
+            width: 85%;
+            font-size: 0.9rem;
+            color: var(--theme-color);
+            box-shadow: var(--glass-shadow), 0 0 20px var(--theme-glow);
+            z-index: 10;
+            box-sizing: border-box;
+            white-space: pre-wrap;
+        }
+
+        .secret-output-box .output-label {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(200%);
+            -webkit-backdrop-filter: blur(24px) saturate(200%);
+            padding: 16px;
+            border-radius: 20px;
+            box-shadow: var(--glass-shadow), 0 15px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            z-index: 10;
+            position: relative;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .row {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .key {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            color: #94a3b8;
+            min-width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            user-select: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 1px rgba(255,255,255,0.1);
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .key.space { min-width: 250px; }
+        .key.backspace { min-width: 75px; }
+        .key.tab { min-width: 60px; }
+        .key.caps { min-width: 75px; }
+        .key.enter { min-width: 85px; }
+        .key.shift { min-width: 95px; }
+
+        .key.active-correct {
+            background-color: var(--theme-color) !important;
+            color: #0d1117 !important;
+            border-color: var(--theme-color) !important;
+            transform: scale(0.94);
+            box-shadow: 0 0 20px var(--theme-glow), inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        @keyframes keyRedFlashAnim {
+            0% {
+                background-color: #ff6b6b;
+                transform: scale(0.92);
+                box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+            }
+            50% {
+                background-color: #ff0033;
+                transform: scale(0.96);
+                box-shadow: 0 0 25px rgba(255, 0, 51, 0.9), inset 0 2px 4px rgba(0,0,0,0.4);
+            }
+            100% {
+                background-color: #ff6b6b;
+                transform: scale(0.92);
+                box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+            }
+        }
+
+        .key.active-incorrect {
+            animation: keyRedFlashAnim 0.25s ease-in-out infinite !important;
+            color: #0d1117 !important;
+            border-color: #ff4d4d !important;
+        }
+
+        .falling-char {
+            position: fixed;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.4rem;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 100;
+            animation: fallAnimation 1s linear forwards;
+        }
+
+        @keyframes fallAnimation {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translate(var(--rand-x), 350px) rotate(var(--rand-rot)) scale(0.5); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Click-to-Enter Intro Overlay -->
+    <div class="intro-screen" id="introScreen">
+        <div class="click-enter-container floating-ui">
+            <h1 id="introTitle"></h1>
+            <p id="introDesc">Click anywhere or press [ Spacebar ] to initialize secure environment</p>
+        </div>
+    </div>
+
+    <!-- Full screen red flash overlay element -->
+    <div class="screen-flash-overlay" id="screenFlashOverlay"></div>
+
+    <div class="menu-screen hide" id="menuScreen">
+        <div class="terminal-box floating-ui">
+            <h1>-PYTYPE-</h1>
+            <p>[ SECURE KERNEL // 50 PYTHON PAYLOADS ]</p>
+            <div class="menu-buttons">
+                <button class="prog-btn" id="startBtn">[ PLAY ]</button>
+                <button class="prog-btn" id="optionsBtn">[ OPTIONS ]</button>
+                <button class="prog-btn exit-btn" id="exitBtn">[ EXIT ]</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="options-modal" id="optionsModal">
+        <div class="options-content">
+            <h2>// KERNEL_CONFIG & THEME</h2>
+            
+            <div class="option-group">
+                <label>[SYNTHWAVE AUDIO MATRIX]:</label>
+                <div class="option-row">
+                    <span id="musicStatusText" style="color: #8b949e; font-size: 0.85rem;">MUTED</span>
+                    <label class="switch">
+                        <input type="checkbox" id="musicToggleCheckbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="option-group">
+                <label>CHOOSE THEME MATRIX:</label>
+                <div class="option-row">
+                    <select id="themeSelect" style="width: 100%; background: rgba(13, 17, 23, 0.6); backdrop-filter: blur(10px); color: var(--theme-color); border: 1px solid var(--glass-border); padding: 10px; border-radius: 10px; font-family: 'Fira Code', monospace; cursor: pointer; box-shadow: var(--glass-shadow);">
+                        <option value="green" style="background: #0d1117; color: #00ff66;">[01] Matrix Green</option>
+                        <option value="blue" style="background: #0d1117; color: #2563eb;">[02] Cyber Blue</option>
+                        <option value="gray" style="background: #0d1117; color: #cccccc;">[03] Frost Gray</option>
+                        <option value="pink" style="background: #0d1117; color: #ff6b6b;">[04] Neon Pink</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="option-group">
+                <label>[AUDIO GAIN]: <span id="volumeVal" style="color: var(--theme-color);">45%</span></label>
+                <div class="option-row">
+                    <input type="range" id="volumeSlider" min="0" max="100" value="45">
+                </div>
+            </div>
+
+            <button class="close-opt-btn" id="closeOptBtn">[ APPLY & RETURN ]</button>
+        </div>
+    </div>
+
+    <div class="app-screen" id="appScreen">
+        <button class="menu-back-btn" id="menuBackBtn">[← KERNEL MENU]</button>
+
+        <button class="next-step-btn" id="nextStepBtn">NEXT PAYLOAD &gt;&gt;</button>
+
+        <div class="stats-panel-right" id="statsPanelRight">
+            <h3>// STATS_LOG</h3>
+            <div class="stat-item">เวลา: <span id="statTime">0.0s</span></div>
+            <div class="stat-item">ความเร็ว: <span id="statWpm">0 WPM</span></div>
+            <div class="stat-item">ความเร็วอักษร: <span id="statCps">0 CPS</span></div>
+            <div class="stat-item">ความแม่นยำ: <span id="statAccuracy">100%</span></div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+            <h1 class="main-title">Python Syntax Typing Test</h1>
+            <div class="snippet-badge" id="snippetBadge">ข้อที่ 1/50: หมวดที่ 1</div>
+            <div class="instructions">พิมพ์คำสั่ง Python ตามโจทย์ด้านล่างให้ถูกต้องทุกตัวอักษร (กด Tab เพื่อช่วยข้ามช่องว่างย่อหน้าได้)</div>
+
+            <div class="target-box" id="targetBox"></div>
+
+            <div class="secret-output-box" id="secretOutputBox">
+                <div class="output-label">// Terminal Output (Live):</div>
+                <div id="outputText">: Waiting for input...</div>
+            </div>
+
+            <div class="keyboard" id="keyboard">
+                <div class="row">
+                    <div class="key" data-key="Backquote">`</div>
+                    <div class="key" data-key="Digit1">1</div>
+                    <div class="key" data-key="Digit2">2</div>
+                    <div class="key" data-key="Digit3">3</div>
+                    <div class="key" data-key="Digit4">4</div>
+                    <div class="key" data-key="Digit5">5</div>
+                    <div class="key" data-key="Digit6">6</div>
+                    <div class="key" data-key="Digit7">7</div>
+                    <div class="key" data-key="Digit8">8</div>
+                    <div class="key" data-key="Digit9">9</div>
+                    <div class="key" data-key="Digit0">0</div>
+                    <div class="key" data-key="Minus">-</div>
+                    <div class="key" data-key="Equal">=</div>
+                    <div class="key backspace" data-key="Backspace">Backspace</div>
+                </div>
+                <div class="row">
+                    <div class="key tab" data-key="Tab">Tab</div>
+                    <div class="key" data-key="KeyQ">Q</div>
+                    <div class="key" data-key="KeyW">W</div>
+                    <div class="key" data-key="KeyE">E</div>
+                    <div class="key" data-key="KeyR">R</div>
+                    <div class="key" data-key="KeyT">T</div>
+                    <div class="key" data-key="KeyY">Y</div>
+                    <div class="key" data-key="KeyU">U</div>
+                    <div class="key" data-key="KeyI">I</div>
+                    <div class="key" data-key="KeyO">O</div>
+                    <div class="key" data-key="KeyP">P</div>
+                    <div class="key" data-key="BracketLeft">[</div>
+                    <div class="key" data-key="BracketRight">]</div>
+                    <div class="key" data-key="Backslash">\\</div>
+                </div>
+                <div class="row">
+                    <div class="key caps" data-key="CapsLock">Caps</div>
+                    <div class="key" data-key="KeyA">A</div>
+                    <div class="key" data-key="KeyS">S</div>
+                    <div class="key" data-key="KeyD">D</div>
+                    <div class="key" data-key="KeyF">F</div>
+                    <div class="key" data-key="KeyG">G</div>
+                    <div class="key" data-key="KeyH">H</div>
+                    <div class="key" data-key="KeyJ">J</div>
+                    <div class="key" data-key="KeyK">K</div>
+                    <div class="key" data-key="KeyL">L</div>
+                    <div class="key" data-key="Semicolon">;</div>
+                    <div class="key" data-key="Quote">'</div>
+                    <div class="key enter" data-key="Enter">Enter</div>
+                </div>
+                <div class="row">
+                    <div class="key shift" data-key="ShiftLeft">Shift</div>
+                    <div class="key" data-key="KeyZ">Z</div>
+                    <div class="key" data-key="KeyX">X</div>
+                    <div class="key" data-key="KeyC">C</div>
+                    <div class="key" data-key="KeyV">V</div>
+                    <div class="key" data-key="KeyB">B</div>
+                    <div class="key" data-key="KeyN">N</div>
+                    <div class="key" data-key="KeyM">M</div>
+                    <div class="key" data-key="Comma">,</div>
+                    <div class="key" data-key="Period">.</div>
+                    <div class="key" data-key="Slash">/</div>
+                    <div class="key shift" data-key="ShiftRight">Shift</div>
+                </div>
+                <div class="row">
+                    <div class="key" data-key="ControlLeft">Ctrl</div>
+                    <div class="key" data-key="AltLeft">Alt</div>
+                    <div class="key space" data-key="Space">Space</div>
+                    <div class="key" data-key="AltRight">Alt</div>
+                    <div class="key" data-key="ControlRight">Ctrl</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const pythonSnippets = [
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 1: การแสดงผลข้อความพื้นฐาน", code: `print("Hello, World")`, output: `Hello, World` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 2: การประกาศตัวแปรและแสดงผล", code: `name = "Python"\\nprint("Welcome to " + name)`, output: `Welcome to Python` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 3: การรับค่าจากผู้ใช้", code: `username = input("Enter your name: ")\\nprint("Hello, " + username)`, output: `Hello, [username]` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 4: การคำนวณทางคณิตศาสตร์เบื้องต้น", code: `a = 10\\nb = 5\\nprint("Sum:", a + b)`, output: `Sum: 15` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 5: เงื่อนไข if-else พื้นฐาน", code: `score = 75\\nif score >= 50:\\n    print("Passed")\\nelse:\\n    print("Failed")`, output: `Passed` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 6: การใช้ลูป for วนซ้ำตามช่วงตัวเลข", code: `for i in range(1, 6):\\n    print("Number:", i)`, output: `Number: 1\\nNumber: 2\\nNumber: 3\\nNumber: 4\\nNumber: 5` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 7: การใช้ลูป while", code: `count = 3\\nwhile count > 0:\\n    print(count)\\n    count -= 1\\nprint("Liftoff!")`, output: `3\\n2\\n1\\nLiftoff!` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 8: การสร้างและใช้งาน List", code: `fruits = ["apple", "banana", "cherry"]\\nprint(fruits[1])`, output: `banana` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 9: การสร้างฟังก์ชันเบื้องต้น", code: `def greet(person):\\n    return "Hello, " + person\\nprint(greet("Somchai"))`, output: `Hello, Somchai` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 10: การแปลงชนิดข้อมูล (Type Conversion)", code: `birth_year = input("Enter birth year: ")\\nage = 2026 - int(birth_year)\\nprint("You are approximately", age, "years old.")`, output: `You are approximately [age] years old.` },
+
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 11: เงื่อนไขแบบหลายทางเลือก", code: `temperature = 30\\nif temperature > 35:\\n    print("Very hot")\\nelif temperature >= 25:\\n    print("Warm")\\nelse:\\n    print("Cool")`, output: `Warm` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 12: ตรวจสอบเลขคู่และเลขคี่", code: `num = int(input("Enter an integer: "))\\nif num % 2 == 0:\\n    print("Even number")\\nelse:\\n    print("Odd number")`, output: `Even number` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 13: Conditional Expression", code: `x = 10\\ny = 20\\nmaximum = x if x > y else y\\nprint("Max is:", maximum)`, output: `Max is: 20` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 14: ลูปตรวจสอบรหัสผ่าน", code: `password = ""\\nwhile password != "secret":\\n    password = input("Enter password: ")\\nprint("Access Granted!")`, output: `Access Granted!` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 15: วนลูปแสดงตัวอักษรในสตริง", code: `for char in "Python":\\n    print(char)`, output: `P\\ny\\nt\\nh\\no\\nn` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 16: การใช้งานคำสั่ง break", code: `for i in range(1, 11):\\n    if i == 6:\\n        break\\n    print(i)`, output: `1\\n2\\n3\\n4\\n5` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 17: การใช้งานคำสั่ง continue", code: `for i in range(1, 6):\\n    if i == 3:\\n        continue\\n    print(i)`, output: `1\\n2\\n4\\n5` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 18: Nested Loop", code: `for i in range(2):\\n    for j in range(2):\\n        print(i, j)`, output: `0 0\\n0 1\\n1 0\\n1 1` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 19: การจัดการข้อผิดพลาด (try-except)", code: `try:\\n    val = int(input("Enter a number: "))\\n    print(10 / val)\\nexcept ZeroDivisionError:\\n    print("Cannot divide by zero!")`, output: `Cannot divide by zero!` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 20: ตัวดำเนินการทางตรรกะ", code: `age = 18\\nhas_id = True\\nif age >= 18 and has_id:\\n    print("Allowed to enter")`, output: `Allowed to enter` },
+
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 21: การเพิ่มข้อมูลใน List", code: `colors = ["red", "green", "blue"]\\ncolors.append("yellow")\\nprint(colors)`, output: `['red', 'green', 'blue', 'yellow']` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 22: การเรียงลำดับข้อมูลใน List", code: `numbers = [5, 2, 9, 1, 7]\\nnumbers.sort()\\nprint(numbers)`, output: `[1, 2, 5, 7, 9]` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 23: Nested List", code: `matrix = [[1, 2], [3, 4]]\\nprint(matrix[0][1])`, output: `2` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 24: List Comprehension", code: `squares = [x**2 for x in range(5)]\\nprint(squares)`, output: `[0, 1, 4, 9, 16]` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 25: Tuple Unpacking", code: `point = (10, 20)\\nx, y = point\\nprint(x, y)`, output: `10 20` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 26: Dictionary พื้นฐาน", code: `student = {"name": "Alice", "age": 22, "major": "CS"}\\nprint(student["name"])`, output: `Alice` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 27: การเพิ่มคีย์ใหม่ใน Dictionary", code: `student = {"name": "Bob", "age": 20}\\nstudent["gpa"] = 3.5\\nprint(student)`, output: `{'name': 'Bob', 'age': 20, 'gpa': 3.5}` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 28: การวนลูปดึงข้อมูลจาก Dictionary", code: `student = {"name": "Charlie", "age": 21}\\nfor key, value in student.items():\\n    print(key, ":", value)`, output: `name : Charlie\\nage : 21` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 29: Set และการตัดค่าที่ซ้ำกัน", code: `unique_nums = {1, 2, 2, 3, 3, 3}\\nprint(unique_nums)`, output: `{1, 2, 3}` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 30: การยูเนียน Set", code: `set_a = {1, 2, 3}\\nset_b = {3, 4, 5}\\nprint(set_a.union(set_b))`, output: `{1, 2, 3, 4, 5}` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 31: การใช้งาน enumerate", code: `names = ["Anna", "Ben", "Chris"]\\nfor index, name in enumerate(names):\\n    print(index, name)`, output: `0 Anna\\n1 Ben\\n2 Chris` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 32: การรวม List เข้าด้วยกัน", code: `list1 = [1, 2, 3]\\nlist2 = [4, 5, 6]\\ncombined = list1 + list2\\nprint(combined)`, output: `[1, 2, 3, 4, 5, 6]` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 33: String Slicing", code: `text = "Hello Python"\\nprint(text[0:5])`, output: `Hello` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 34: String Methods (strip และ title)", code: `text = " python programming "\\nprint(text.strip().title())`, output: `Python Programming` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 35: การเชื่อมสตริงด้วย join", code: `words = ["Python", "is", "awesome"]\\nsentence = " ".join(words)\\nprint(sentence)`, output: `Python is awesome` },
+
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 36: ฟังก์ชันคำนวณพื้นที่", code: `def calculate_area(width, height):\\n    return width * height\\nprint(calculate_area(5, 10))`, output: `50` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 37: ฟังก์ชันที่มี Default Argument", code: `def power(base, exponent=2):\\n    return base ** exponent\\nprint(power(3))\\nprint(power(2, 3))`, output: `9\\n8` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 38: พารามิเตอร์ไม่จำกัดจำนวน (*args)", code: `def print_names(*names):\\n    for name in names:\\n        print(name)\\nprint_names("Alice", "Bob", "Charlie")`, output: `Alice\\nBob\\nCharlie` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 39: Lambda Function", code: `square = lambda x: x ** 2\\nprint(square(4))`, output: `16` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 40: การใช้ map กับ Lambda", code: `numbers = [1, 2, 3, 4]\\ndoubled = list(map(lambda x: x * 2, numbers))\\nprint(doubled)`, output: `[2, 4, 6, 8]` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 41: การใช้ filter กับ Lambda", code: `numbers = [1, 2, 3, 4, 5, 6]\\nevens = list(filter(lambda x: x % 2 == 0, numbers))\\nprint(evens)`, output: `[2, 4, 6]` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 42: การสร้างคลาสและเมธอดเบื้องต้น", code: `class Dog:\\n    def __init__(self, name):\\n        self.name = name\\n    def bark(self):\\n        return self.name + " says Woof!"\\nmy_dog = Dog("Buddy")\\nprint(my_dog.bark())`, output: `Buddy says Woof!` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 43: คลาสพร้อมเมธอดแนะนำตัว (f-string)", code: `class Person:\\n    def __init__(self, name, age):\\n        self.name = name\\n        self.age = age\\n    def introduce(self):\\n        print(f"Hi, I am {self.name} and I am {self.age} years old.")\\np = Person("Anna", 25)\\np.introduce()`, output: `Hi, I am Anna and I am 25 years old.` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 44: การเรียกใช้งานโมดูล math", code: `import math\\nprint(math.sqrt(16))\\nprint(math.pi)`, output: `4.0\\n3.141592653589793` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 45: การใช้งานโมดูล random", code: `import random\\nprint(random.randint(1, 10))`, output: `(Random number 1-10)` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 46: การใช้งานโมดูล datetime", code: `import datetime\\nnow = datetime.datetime.now()\\nprint("Current year:", now.year)`, output: `Current year: 2026` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 47: การเขียนไฟล์ข้อความ", code: `with open("sample.txt", "w") as f:\\n    f.write("Hello, File!")`, output: `(File sample.txt written successfully)` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 48: การอ่านไฟล์ข้อความ", code: `with open("sample.txt", "r") as f:\\n    content = f.read()\\n    print(content)`, output: `Hello, File!` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 49: การใช้งานโมดูล os", code: `import os\\nprint(os.getcwd())`, output: `/current/working/directory` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 50: ฟังก์ชันเรียกตัวเอง (Factorial)", code: `def factorial(n):\\n    if n == 1:\\n        return 1\\n    return n * factorial(n - 1)\\nprint(factorial(5))`, output: `120` }
+        ];
+
+        let snippetIndex = 0;
+        let currentItem = pythonSnippets[snippetIndex];
+        let sampleText = currentItem.code;
+        
+        let currentIndex = 0;
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let hasErrorInCurrentPos = false;
+        let isDone = false;
+
+        let startTime = null;
+        let isStarted = false;
+        let appActive = false;
+
+        const introScreen = document.getElementById('introScreen');
+        const menuScreen = document.getElementById('menuScreen');
+        const optionsModal = document.getElementById('optionsModal');
+        const appScreen = document.getElementById('appScreen');
+        const targetBox = document.getElementById('targetBox');
+        const keyboardBox = document.getElementById('keyboard');
+        const screenFlashOverlay = document.getElementById('screenFlashOverlay');
+        const outputText = document.getElementById('outputText');
+        const nextStepBtn = document.getElementById('nextStepBtn');
+        const statsPanelRight = document.getElementById('statsPanelRight');
+        const snippetBadge = document.getElementById('snippetBadge');
+        
+        const musicToggleCheckbox = document.getElementById('musicToggleCheckbox');
+        const musicStatusText = document.getElementById('musicStatusText');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeVal = document.getElementById('volumeVal');
+
+        const statTime = document.getElementById('statTime');
+        const statWpm = document.getElementById('statWpm');
+        const statCps = document.getElementById('statCps');
+        const statAccuracy = document.getElementById('statAccuracy');
+
+        // ฟังก์ชันรันอนิเมชั่นพิมพ์ทีละตัวอักษรสำหรับหน้า Intro
+        function runIntroTypingEffect() {
+            const titleText = "-PYTYPE-";
+            const titleElem = document.getElementById('introTitle');
+
+            titleElem.innerHTML = '';
+
+            let i = 0;
+            const cursor = document.createElement('span');
+            cursor.className = 'typing-cursor';
+            titleElem.appendChild(cursor);
+
+            function typeTitle() {
+                if (i < titleText.length) {
+                    cursor.insertAdjacentText('beforebegin', titleText.charAt(i));
+                    i++;
+                    setTimeout(typeTitle, 75);
+                }
+            }
+
+            typeTitle();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            runIntroTypingEffect();
+        });
+
+        function enterSystem() {
+            initAudioContext();
+            introScreen.classList.add('hide');
+            menuScreen.classList.remove('hide');
+        }
+
+        introScreen.addEventListener('click', enterSystem);
+
+        document.getElementById('startBtn').addEventListener('click', startApp);
+        document.getElementById('optionsBtn').addEventListener('click', openOptions);
+        document.getElementById('exitBtn').addEventListener('click', exitApp);
+        document.getElementById('closeOptBtn').addEventListener('click', closeOptions);
+        document.getElementById('menuBackBtn').addEventListener('click', backToMenu);
+        document.getElementById('nextStepBtn').addEventListener('click', nextSnippet);
+
+        document.getElementById('themeSelect').addEventListener('change', function() {
+            handleThemeChange(this);
+        });
+        document.getElementById('musicToggleCheckbox').addEventListener('change', function() {
+            handleMusicToggle(this);
+        });
+        document.getElementById('volumeSlider').addEventListener('input', function() {
+            handleVolumeChange(this);
+        });
+
+        function handleThemeChange(select) {
+            const theme = select.value;
+            document.body.classList.remove('theme-blue', 'theme-gray', 'theme-pink');
+            if (theme === 'blue') document.body.classList.add('theme-blue');
+            else if (theme === 'gray') document.body.classList.add('theme-gray');
+            else if (theme === 'pink') document.body.classList.add('theme-pink');
+        }
+
+        function openOptions() { optionsModal.classList.add('show'); }
+        function closeOptions() { optionsModal.classList.remove('show'); }
+
+        let audioCtx = null;
+        let isMusicPlaying = false;
+        let musicInterval = null;
+        let masterVolume = 0.45;
+
+        function initAudioContext() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function handleMusicToggle(checkbox) {
+            initAudioContext();
+            isMusicPlaying = checkbox.checked;
+            if (isMusicPlaying) {
+                musicStatusText.innerText = "ACTIVE";
+                musicStatusText.style.color = "var(--theme-color)";
+                startSong303PM();
+            } else {
+                musicStatusText.innerText = "MUTED";
+                musicStatusText.style.color = "#8b949e";
+                stopSong303PM();
+            }
+        }
+
+        function handleVolumeChange(slider) {
+            masterVolume = slider.value / 100;
+            volumeVal.innerText = `${slider.value}%`;
+        }
+
+        function playTypeSound(isCorrect) {
+            try {
+                initAudioContext();
+                const now = audioCtx.currentTime;
+                
+                if (isCorrect) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1200, now);
+                    osc.frequency.exponentialRampToValueAtTime(1800, now + 0.04);
+                    
+                    const adjustedGain = 0.12 * masterVolume;
+                    gain.gain.setValueAtTime(adjustedGain, now);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.06);
+
+                    const bufferSize = audioCtx.sampleRate * 0.01;
+                    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = Math.random() * 2 - 1;
+                    }
+                    const noise = audioCtx.createBufferSource();
+                    noise.buffer = buffer;
+                    const noiseGain = audioCtx.createGain();
+                    noiseGain.gain.setValueAtTime(0.05 * masterVolume, now);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.01);
+                    noise.connect(noiseGain);
+                    noiseGain.connect(audioCtx.destination);
+                    noise.start(now);
+                } else {
+                    const osc1 = audioCtx.createOscillator();
+                    const osc2 = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    osc1.type = 'sawtooth';
+                    osc2.type = 'square';
+                    osc1.frequency.setValueAtTime(150, now);
+                    osc1.frequency.linearRampToValueAtTime(80, now + 0.12);
+                    osc2.frequency.setValueAtTime(142, now);
+                    osc2.frequency.linearRampToValueAtTime(75, now + 0.12);
+                    
+                    const adjustedGain = 0.15 * masterVolume;
+                    gain.gain.setValueAtTime(adjustedGain, now);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+                    
+                    osc1.connect(gain);
+                    osc2.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc1.start(now);
+                    osc2.start(now);
+                    osc1.stop(now + 0.12);
+                    osc2.stop(now + 0.12);
+                }
+            } catch (e) {}
+        }
+
+        function startSong303PM() {
+            if (musicInterval) return;
+            initAudioContext();
+            const melodyCute = [ 523.25, 587.33, 659.25, 783.99, 880.00, 783.99, 659.25, 587.33, 523.25, 659.25, 783.99, 1046.50, 880.00, 783.99, 659.25, 587.33 ];
+            let step = 0;
+            musicInterval = setInterval(() => {
+                if (!isMusicPlaying || !audioCtx || masterVolume <= 0) return;
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(melodyCute[step % melodyCute.length], audioCtx.currentTime);
+                    const adjustedGain = 0.06 * masterVolume;
+                    gain.gain.setValueAtTime(adjustedGain, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.25);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                    step++;
+                } catch (e) {}
+            }, 200);
+        }
+
+        function stopSong303PM() {
+            if (musicInterval) {
+                clearInterval(musicInterval);
+                musicInterval = null;
+            }
+        }
+
+        function createMatrixBackgroundChar() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-*/<>[]{}()=abcdefghijklmnopqrstuvwxyz#@_";
+            const charSpan = document.createElement('span');
+            charSpan.className = 'matrix-bg-char';
+            charSpan.innerText = chars[Math.floor(Math.random() * chars.length)];
+            charSpan.style.left = Math.random() * window.innerWidth + 'px';
+            const duration = Math.random() * 4 + 6;
+            charSpan.style.animationDuration = duration + 's';
+            const charChangeInterval = setInterval(() => { charSpan.innerText = chars[Math.floor(Math.random() * chars.length)]; }, 100);
+            document.body.appendChild(charSpan);
+            setTimeout(() => { clearInterval(charChangeInterval); charSpan.remove(); }, duration * 1000);
+        }
+        setInterval(createMatrixBackgroundChar, 180);
+
+        function initText() {
+            targetBox.innerHTML = "";
+            outputText.innerText = ": Waiting for input...";
+            nextStepBtn.classList.remove('show');
+            statsPanelRight.classList.remove('show');
+            snippetBadge.innerText = `ข้อที่ ${snippetIndex + 1}/50: ${currentItem.title}`;
+
+            for (let i = 0; i < sampleText.length; i++) {
+                const span = document.createElement('span');
+                span.innerText = sampleText[i];
+                span.className = 'char';
+                if (i === 0) span.classList.add('current');
+                targetBox.appendChild(span);
+            }
+        }
+
+        initText();
+
+        function startApp() {
+            optionsModal.classList.remove('show');
+            menuScreen.classList.add('hide');
+            appScreen.classList.add('active');
+            appActive = true;
+            resetGame();
+        }
+
+        function backToMenu() {
+            stopTimer();
+            appScreen.classList.remove('active');
+            menuScreen.classList.remove('hide');
+            appActive = false;
+        }
+
+        function exitApp() {
+            window.close();
+            setTimeout(() => { window.location.href = "about:blank"; }, 100);
+        }
+
+        function startTimer() {
+            if (!isStarted) {
+                isStarted = true;
+                startTime = new Date().getTime();
+            }
+        }
+        function stopTimer() { isStarted = false; }
+
+        function resetGame() {
+            stopTimer();
+            currentIndex = 0;
+            correctCount = 0;
+            incorrectCount = 0;
+            hasErrorInCurrentPos = false;
+            isDone = false;
+            initText();
+        }
+
+        function triggerErrorFlash() {
+            document.body.classList.remove('shake-effect');
+            targetBox.classList.remove('red-flash-effect');
+            keyboardBox.classList.remove('red-flash-effect');
+            screenFlashOverlay.classList.remove('screen-flash-active');
+            
+            void document.body.offsetWidth;
+
+            document.body.classList.add('shake-effect');
+            targetBox.classList.add('red-flash-effect');
+            keyboardBox.classList.add('red-flash-effect');
+            screenFlashOverlay.classList.add('screen-flash-active');
+        }
+
+        function createFallingChar(char, isCorrect, targetElement) {
+            if (!targetElement) return;
+            const fallingDiv = document.createElement('div');
+            fallingDiv.innerText = char === ' ' ? ' ' : (char === 'Enter' ? '↵' : char);
+            fallingDiv.className = 'falling-char';
+            fallingDiv.style.color = isCorrect ? getComputedStyle(document.body).getPropertyValue('--theme-color').trim() : '#ff6b6b';
+
+            const rect = targetElement.getBoundingClientRect();
+            fallingDiv.style.left = (rect.left + rect.width / 2) + 'px';
+            fallingDiv.style.top = (rect.top + rect.height / 2) + 'px';
+
+            const randomX = (Math.random() - 0.5) * 300 + 'px';
+            const randomRot = (Math.random() - 0.5) * 720 + 'deg';
+            fallingDiv.style.setProperty('--rand-x', randomX);
+            fallingDiv.style.setProperty('--rand-rot', randomRot);
+
+            document.body.appendChild(fallingDiv);
+            setTimeout(() => fallingDiv.remove(), 1000);
+        }
+
+        function executeCode() {
+            if (!isDone) return;
+            outputText.innerText = `: ${currentItem.output}`;
+            showCompletionStats();
+        }
+
+        function showCompletionStats() {
+            const endTime = new Date().getTime();
+            const totalSeconds = ((endTime - startTime) / 1000).toFixed(1);
+            
+            const totalChars = sampleText.length;
+            const words = totalChars / 5;
+            const minutes = totalSeconds / 60;
+            const wpm = minutes > 0 ? Math.round(words / minutes) : 0;
+            const cps = totalSeconds > 0 ? (totalChars / totalSeconds).toFixed(1) : 0;
+
+            const totalAttempts = correctCount + incorrectCount;
+            const accuracy = totalAttempts > 0 ? Math.max(0, Math.round((correctCount / totalAttempts) * 100)) : 100;
+
+            statTime.innerText = `${totalSeconds}s`;
+            statWpm.innerText = `${wpm} WPM`;
+            statCps.innerText = `${cps} CPS`;
+            statAccuracy.innerText = `${accuracy}%`;
+
+            statsPanelRight.classList.add('show');
+            nextStepBtn.classList.add('show');
+        }
+
+        function nextSnippet() {
+            targetBox.style.transform = 'scale(0.98)';
+            targetBox.style.opacity = '0.4';
+            setTimeout(() => {
+                snippetIndex = (snippetIndex + 1) % pythonSnippets.length;
+                currentItem = pythonSnippets[snippetIndex];
+                sampleText = currentItem.code;
+                resetGame();
+                targetBox.style.transform = 'scale(1)';
+                targetBox.style.opacity = '1';
+            }, 150);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            // เช็คว่าถ้ายังอยู่หน้า Intro Screen แล้วกดปุ่ม Spacebar (หรือ Enter)
+            if (!introScreen.classList.contains('hide')) {
+                if (e.code === 'Space' || e.key === 'Enter') {
+                    e.preventDefault();
+                    enterSystem();
+                    return;
+                }
+            }
+
+            if (!appActive) return;
+
+            if (isDone) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    executeCode();
+                }
+                return;
+            }
+
+            const charSpans = targetBox.querySelectorAll('.char');
+            let keyElement = document.querySelector(`.key[data-key="${e.code}"]`);
+
+            if (e.key === "Tab") {
+                e.preventDefault();
+                startTimer();
+                let spacesCount = 0;
+                while (currentIndex + spacesCount < sampleText.length && sampleText[currentIndex + spacesCount] === ' ') {
+                    spacesCount++;
+                    if (spacesCount >= 4) break;
+                }
+                if (spacesCount > 0) {
+                    for (let k = 0; k < spacesCount; k++) {
+                        const activeSpan = charSpans[currentIndex];
+                        activeSpan.classList.remove('current', 'incorrect');
+                        activeSpan.classList.add('correct');
+                        currentIndex++;
+                        correctCount++;
+                    }
+                    playTypeSound(true);
+                    if (currentIndex < sampleText.length) {
+                        charSpans[currentIndex].classList.add('current');
+                    } else {
+                        stopTimer();
+                        isDone = true;
+                        outputText.innerText = `: Ready to execute. Press Enter to run code!`;
+                    }
+                }
+                if (keyElement) keyElement.classList.add('active-correct');
+                return;
+            }
+
+            if (e.key === "Backspace") {
+                if (hasErrorInCurrentPos) {
+                    charSpans[currentIndex].classList.remove('incorrect');
+                    charSpans[currentIndex].classList.add('current');
+                    hasErrorInCurrentPos = false;
+                } else if (currentIndex > 0) {
+                    charSpans[currentIndex].classList.remove('current');
+                    currentIndex--;
+                    charSpans[currentIndex].classList.remove('correct', 'incorrect');
+                    charSpans[currentIndex].classList.add('current');
+                }
+                if (keyElement) keyElement.classList.add('active-correct');
+                return;
+            }
+
+            if (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta" || e.key === "Escape") return;
+            if (currentIndex >= sampleText.length) return;
+
+            let inputChar = e.key;
+            if (inputChar === 'Enter') inputChar = '\\n';
+
+            if (hasErrorInCurrentPos) {
+                triggerErrorFlash();
+                playTypeSound(false);
+                if (keyElement) {
+                    keyElement.classList.add('active-incorrect');
+                    createFallingChar(inputChar, false, keyElement);
+                }
+                return;
+            }
+
+            startTimer();
+            const expectedChar = sampleText[currentIndex];
+            const activeSpan = charSpans[currentIndex];
+            
+            if (inputChar === expectedChar) {
+                activeSpan.classList.remove('current', 'incorrect');
+                activeSpan.classList.add('correct');
+                
+                playTypeSound(true);
+                createFallingChar(expectedChar, true, activeSpan);
+                if (keyElement) createFallingChar(e.key, true, keyElement);
+
+                currentIndex++;
+                correctCount++;
+
+                if (currentIndex < sampleText.length) {
+                    charSpans[currentIndex].classList.add('current');
+                } else {
+                    stopTimer();
+                    isDone = true;
+                    outputText.innerText = `: Ready to execute. Press Enter to run code!`;
+                }
+
+                if (keyElement) keyElement.classList.add('active-correct');
+            } else {
+                activeSpan.classList.remove('current');
+                activeSpan.classList.add('incorrect');
+                
+                playTypeSound(false);
+                createFallingChar(inputChar, false, activeSpan);
+                if (keyElement) keyElement.classList.add('active-incorrect');
+
+                incorrectCount++;
+                hasErrorInCurrentPos = true;
+                
+                triggerErrorFlash();
+            }
+            
+            if (e.key === ' ' || e.key === 'Enter') e.preventDefault();
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const keyElement = document.querySelector(`.key[data-key="${e.code}"]`);
+            if (keyElement) {
+                keyElement.classList.remove('active-correct', 'active-incorrect');
+            }
+        });
+    </script>
+
+</body>
+</html>
+"""
+
+@app.route('/')
+def home():
+    return HTML_CODE
+
+if __name__ == '__main__':
+    app.run(debug=True, port=6767)
