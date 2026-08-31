@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -673,6 +672,13 @@
             animation: blink 1s infinite;
         }
         
+        .char.newline-char::after {
+            content: "↵";
+            opacity: 0.35;
+            margin-left: 4px;
+            font-size: 0.85rem;
+        }
+        
         @keyframes blink {
             50% { border-color: transparent; }
         }
@@ -987,58 +993,58 @@
     <script>
         const pythonSnippets = [
             { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 1: การแสดงผลข้อความพื้นฐาน", code: `print("Hello, World")`, output: `Hello, World` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 2: การประกาศตัวแปรและแสดงผล", code: `name = "Python"\\nprint("Welcome to " + name)`, output: `Welcome to Python` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 3: การรับค่าจากผู้ใช้", code: `username = input("Enter your name: ")\\nprint("Hello, " + username)`, output: `Hello, [username]` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 4: การคำนวณทางคณิตศาสตร์เบื้องต้น", code: `a = 10\\nb = 5\\nprint("Sum:", a + b)`, output: `Sum: 15` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 5: เงื่อนไข if-else พื้นฐาน", code: `score = 75\\nif score >= 50:\\n    print("Passed")\\nelse:\\n    print("Failed")`, output: `Passed` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 6: การใช้ลูป for วนซ้ำตามช่วงตัวเลข", code: `for i in range(1, 6):\\n    print("Number:", i)`, output: `Number: 1\\nNumber: 2\\nNumber: 3\\nNumber: 4\\nNumber: 5` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 7: การใช้ลูป while", code: `count = 3\\nwhile count > 0:\\n    print(count)\\n    count -= 1\\nprint("Liftoff!")`, output: `3\\n2\\n1\\nLiftoff!` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 8: การสร้างและใช้งาน List", code: `fruits = ["apple", "banana", "cherry"]\\nprint(fruits[1])`, output: `banana` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 9: การสร้างฟังก์ชันเบื้องต้น", code: `def greet(person):\\n    return "Hello, " + person\\nprint(greet("Somchai"))`, output: `Hello, Somchai` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 10: การแปลงชนิดข้อมูล (Type Conversion)", code: `birth_year = input("Enter birth year: ")\\nage = 2026 - int(birth_year)\\nprint("You are approximately", age, "years old.")`, output: `You are approximately [age] years old.` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 2: การประกาศตัวแปรและแสดงผล", code: `name = "Python"\nprint("Welcome to " + name)`, output: `Welcome to Python` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 3: การรับค่าจากผู้ใช้", code: `username = input("Enter your name: ")\nprint("Hello, " + username)`, output: `Hello, [username]` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 4: การคำนวณทางคณิตศาสตร์เบื้องต้น", code: `a = 10\nb = 5\nprint("Sum:", a + b)`, output: `Sum: 15` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 5: เงื่อนไข if-else พื้นฐาน", code: `score = 75\nif score >= 50:\n    print("Passed")\nelse:\n    print("Failed")`, output: `Passed` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 6: การใช้ลูป for วนซ้ำตามช่วงตัวเลข", code: `for i in range(1, 6):\n    print("Number:", i)`, output: `Number: 1\nNumber: 2\nNumber: 3\nNumber: 4\nNumber: 5` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 7: การใช้ลูป while", code: `count = 3\nwhile count > 0:\n    print(count)\n    count -= 1\nprint("Liftoff!")`, output: `3\n2\n1\nLiftoff!` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 8: การสร้างและใช้งาน List", code: `fruits = ["apple", "banana", "cherry"]\nprint(fruits[1])`, output: `banana` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 9: การสร้างฟังก์ชันเบื้องต้น", code: `def greet(person):\n    return "Hello, " + person\nprint(greet("Somchai"))`, output: `Hello, Somchai` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 10: การแปลงชนิดข้อมูล (Type Conversion)", code: `birth_year = input("Enter birth year: ")\nage = 2026 - int(birth_year)\nprint("You are approximately", age, "years old.")`, output: `You are approximately [age] years old.` },
 
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 11: เงื่อนไขแบบหลายทางเลือก", code: `temperature = 30\\nif temperature > 35:\\n    print("Very hot")\\nelif temperature >= 25:\\n    print("Warm")\\nelse:\\n    print("Cool")`, output: `Warm` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 12: ตรวจสอบเลขคู่และเลขคี่", code: `num = int(input("Enter an integer: "))\\nif num % 2 == 0:\\n    print("Even number")\\nelse:\\n    print("Odd number")`, output: `Even number` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 13: Conditional Expression", code: `x = 10\\ny = 20\\nmaximum = x if x > y else y\\nprint("Max is:", maximum)`, output: `Max is: 20` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 14: ลูปตรวจสอบรหัสผ่าน", code: `password = ""\\nwhile password != "secret":\\n    password = input("Enter password: ")\\nprint("Access Granted!")`, output: `Access Granted!` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 15: วนลูปแสดงตัวอักษรในสตริง", code: `for char in "Python":\\n    print(char)`, output: `P\\ny\\nt\\nh\\no\\nn` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 16: การใช้งานคำสั่ง break", code: `for i in range(1, 11):\\n    if i == 6:\\n        break\\n    print(i)`, output: `1\\n2\\n3\\n4\\n5` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 17: การใช้งานคำสั่ง continue", code: `for i in range(1, 6):\\n    if i == 3:\\n        continue\\n    print(i)`, output: `1\\n2\\n4\\n5` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 18: Nested Loop", code: `for i in range(2):\\n    for j in range(2):\\n        print(i, j)`, output: `0 0\\n0 1\\n1 0\\n1 1` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 19: การจัดการข้อผิดพลาด (try-except)", code: `try:\\n    val = int(input("Enter a number: "))\\n    print(10 / val)\\nexcept ZeroDivisionError:\\n    print("Cannot divide by zero!")`, output: `Cannot divide by zero!` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 20: ตัวดำเนินการทางตรรกะ", code: `age = 18\\nhas_id = True\\nif age >= 18 and has_id:\\n    print("Allowed to enter")`, output: `Allowed to enter` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 11: เงื่อนไขแบบหลายทางเลือก", code: `temperature = 30\nif temperature > 35:\n    print("Very hot")\nelif temperature >= 25:\n    print("Warm")\nelse:\n    print("Cool")`, output: `Warm` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 12: ตรวจสอบเลขคู่และเลขคี่", code: `num = int(input("Enter an integer: "))\nif num % 2 == 0:\n    print("Even number")\nelse:\n    print("Odd number")`, output: `Even number` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 13: Conditional Expression", code: `x = 10\ny = 20\nmaximum = x if x > y else y\nprint("Max is:", maximum)`, output: `Max is: 20` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 14: ลูปตรวจสอบรหัสผ่าน", code: `password = ""\nwhile password != "secret":\n    password = input("Enter password: ")\nprint("Access Granted!")`, output: `Access Granted!` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 15: วนลูปแสดงตัวอักษรในสตริง", code: `for char in "Python":\n    print(char)`, output: `P\ny\nt\nh\no\nn` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 16: การใช้งานคำสั่ง break", code: `for i in range(1, 11):\n    if i == 6:\n        break\n    print(i)`, output: `1\n2\n3\n4\n5` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 17: การใช้งานคำสั่ง continue", code: `for i in range(1, 6):\n    if i == 3:\n        continue\n    print(i)`, output: `1\n2\n4\n5` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 18: Nested Loop", code: `for i in range(2):\n    for j in range(2):\n        print(i, j)`, output: `0 0\n0 1\n1 0\n1 1` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 19: การจัดการข้อผิดพลาด (try-except)", code: `try:\n    val = int(input("Enter a number: "))\n    print(10 / val)\nexcept ZeroDivisionError:\n    print("Cannot divide by zero!")`, output: `Cannot divide by zero!` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 20: ตัวดำเนินการทางตรรกะ", code: `age = 18\nhas_id = True\nif age >= 18 and has_id:\n    print("Allowed to enter")`, output: `Allowed to enter` },
 
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 21: การเพิ่มข้อมูลใน List", code: `colors = ["red", "green", "blue"]\\ncolors.append("yellow")\\nprint(colors)`, output: `['red', 'green', 'blue', 'yellow']` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 22: การเรียงลำดับข้อมูลใน List", code: `numbers = [5, 2, 9, 1, 7]\\nnumbers.sort()\\nprint(numbers)`, output: `[1, 2, 5, 7, 9]` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 23: Nested List", code: `matrix = [[1, 2], [3, 4]]\\nprint(matrix[0][1])`, output: `2` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 24: List Comprehension", code: `squares = [x**2 for x in range(5)]\\nprint(squares)`, output: `[0, 1, 4, 9, 16]` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 25: Tuple Unpacking", code: `point = (10, 20)\\nx, y = point\\nprint(x, y)`, output: `10 20` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 26: Dictionary พื้นฐาน", code: `student = {"name": "Alice", "age": 22, "major": "CS"}\\nprint(student["name"])`, output: `Alice` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 27: การเพิ่มคีย์ใหม่ใน Dictionary", code: `student = {"name": "Bob", "age": 20}\\nstudent["gpa"] = 3.5\\nprint(student)`, output: `{'name': 'Bob', 'age': 20, 'gpa': 3.5}` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 28: การวนลูปดึงข้อมูลจาก Dictionary", code: `student = {"name": "Charlie", "age": 21}\\nfor key, value in student.items():\\n    print(key, ":", value)`, output: `name : Charlie\\nage : 21` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 29: Set และการตัดค่าที่ซ้ำกัน", code: `unique_nums = {1, 2, 2, 3, 3, 3}\\nprint(unique_nums)`, output: `{1, 2, 3}` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 30: การยูเนียน Set", code: `set_a = {1, 2, 3}\\nset_b = {3, 4, 5}\\nprint(set_a.union(set_b))`, output: `{1, 2, 3, 4, 5}` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 31: การใช้งาน enumerate", code: `names = ["Anna", "Ben", "Chris"]\\nfor index, name in enumerate(names):\\n    print(index, name)`, output: `0 Anna\\n1 Ben\\n2 Chris` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 32: การรวม List เข้าด้วยกัน", code: `list1 = [1, 2, 3]\\nlist2 = [4, 5, 6]\\ncombined = list1 + list2\\nprint(combined)`, output: `[1, 2, 3, 4, 5, 6]` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 33: String Slicing", code: `text = "Hello Python"\\nprint(text[0:5])`, output: `Hello` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 34: String Methods (strip และ title)", code: `text = " python programming "\\nprint(text.strip().title())`, output: `Python Programming` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 35: การเชื่อมสตริงด้วย join", code: `words = ["Python", "is", "awesome"]\\nsentence = " ".join(words)\\nprint(sentence)`, output: `Python is awesome` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 21: การเพิ่มข้อมูลใน List", code: `colors = ["red", "green", "blue"]\ncolors.append("yellow")\nprint(colors)`, output: `['red', 'green', 'blue', 'yellow']` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 22: การเรียงลำดับข้อมูลใน List", code: `numbers = [5, 2, 9, 1, 7]\nnumbers.sort()\nprint(numbers)`, output: `[1, 2, 5, 7, 9]` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 23: Nested List", code: `matrix = [[1, 2], [3, 4]]\nprint(matrix[0][1])`, output: `2` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 24: List Comprehension", code: `squares = [x**2 for x in range(5)]\nprint(squares)`, output: `[0, 1, 4, 9, 16]` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 25: Tuple Unpacking", code: `point = (10, 20)\nx, y = point\nprint(x, y)`, output: `10 20` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 26: Dictionary พื้นฐาน", code: `student = {"name": "Alice", "age": 22, "major": "CS"}\nprint(student["name"])`, output: `Alice` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 27: การเพิ่มคีย์ใหม่ใน Dictionary", code: `student = {"name": "Bob", "age": 20}\nstudent["gpa"] = 3.5\nprint(student)`, output: `{'name': 'Bob', 'age': 20, 'gpa': 3.5}` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 28: การวนลูปดึงข้อมูลจาก Dictionary", code: `student = {"name": "Charlie", "age": 21}\nfor key, value in student.items():\n    print(key, ":", value)`, output: `name : Charlie\nage : 21` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 29: Set และการตัดค่าที่ซ้ำกัน", code: `unique_nums = {1, 2, 2, 3, 3, 3}\nprint(unique_nums)`, output: `{1, 2, 3}` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 30: การยูเนียน Set", code: `set_a = {1, 2, 3}\nset_b = {3, 4, 5}\nprint(set_a.union(set_b))`, output: `{1, 2, 3, 4, 5}` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 31: การใช้งาน enumerate", code: `names = ["Anna", "Ben", "Chris"]\nfor index, name in enumerate(names):\n    print(index, name)`, output: `0 Anna\n1 Ben\n2 Chris` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 32: การรวม List เข้าด้วยกัน", code: `list1 = [1, 2, 3]\nlist2 = [4, 5, 6]\ncombined = list1 + list2\nprint(combined)`, output: `[1, 2, 3, 4, 5, 6]` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 33: String Slicing", code: `text = "Hello Python"\nprint(text[0:5])`, output: `Hello` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 34: String Methods (strip และ title)", code: `text = " python programming "\nprint(text.strip().title())`, output: `Python Programming` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 35: การเชื่อมสตริงด้วย join", code: `words = ["Python", "is", "awesome"]\nsentence = " ".join(words)\nprint(sentence)`, output: `Python is awesome` },
 
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 36: ฟังก์ชันคำนวณพื้นที่", code: `def calculate_area(width, height):\\n    return width * height\\nprint(calculate_area(5, 10))`, output: `50` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 37: ฟังก์ชันที่มี Default Argument", code: `def power(base, exponent=2):\\n    return base ** exponent\\nprint(power(3))\\nprint(power(2, 3))`, output: `9\\n8` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 38: พารามิเตอร์ไม่จำกัดจำนวน (*args)", code: `def print_names(*names):\\n    for name in names:\\n        print(name)\\nprint_names("Alice", "Bob", "Charlie")`, output: `Alice\\nBob\\nCharlie` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 39: Lambda Function", code: `square = lambda x: x ** 2\\nprint(square(4))`, output: `16` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 40: การใช้ map กับ Lambda", code: `numbers = [1, 2, 3, 4]\\ndoubled = list(map(lambda x: x * 2, numbers))\\nprint(doubled)`, output: `[2, 4, 6, 8]` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 41: การใช้ filter กับ Lambda", code: `numbers = [1, 2, 3, 4, 5, 6]\\nevens = list(filter(lambda x: x % 2 == 0, numbers))\\nprint(evens)`, output: `[2, 4, 6]` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 42: การสร้างคลาสและเมธอดเบื้องต้น", code: `class Dog:\\n    def __init__(self, name):\\n        self.name = name\\n    def bark(self):\\n        return self.name + " says Woof!"\\nmy_dog = Dog("Buddy")\\nprint(my_dog.bark())`, output: `Buddy says Woof!` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 43: คลาสพร้อมเมธอดแนะนำตัว (f-string)", code: `class Person:\\n    def __init__(self, name, age):\\n        self.name = name\\n        self.age = age\\n    def introduce(self):\\n        print(f"Hi, I am {self.name} and I am {self.age} years old.")\\np = Person("Anna", 25)\\np.introduce()`, output: `Hi, I am Anna and I am 25 years old.` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 44: การเรียกใช้งานโมดูล math", code: `import math\\nprint(math.sqrt(16))\\nprint(math.pi)`, output: `4.0\\n3.141592653589793` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 45: การใช้งานโมดูล random", code: `import random\\nprint(random.randint(1, 10))`, output: `(Random number 1-10)` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 46: การใช้งานโมดูล datetime", code: `import datetime\\nnow = datetime.datetime.now()\\nprint("Current year:", now.year)`, output: `Current year: 2026` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 47: การเขียนไฟล์ข้อความ", code: `with open("sample.txt", "w") as f:\\n    f.write("Hello, File!")`, output: `(File sample.txt written successfully)` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 48: การอ่านไฟล์ข้อความ", code: `with open("sample.txt", "r") as f:\\n    content = f.read()\\n    print(content)`, output: `Hello, File!` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 49: การใช้งานโมดูล os", code: `import os\\nprint(os.getcwd())`, output: `/current/working/directory` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 50: ฟังก์ชันเรียกตัวเอง (Factorial)", code: `def factorial(n):\\n    if n == 1:\\n        return 1\\n    return n * factorial(n - 1)\\nprint(factorial(5))`, output: `120` }
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 36: ฟังก์ชันคำนวณพื้นที่", code: `def calculate_area(width, height):\n    return width * height\nprint(calculate_area(5, 10))`, output: `50` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 37: ฟังก์ชันที่มี Default Argument", code: `def power(base, exponent=2):\n    return base ** exponent\nprint(power(3))\nprint(power(2, 3))`, output: `9\n8` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 38: พารามิเตอร์ไม่จำกัดจำนวน (*args)", code: `def print_names(*names):\n    for name in names:\n        print(name)\nprint_names("Alice", "Bob", "Charlie")`, output: `Alice\nBob\nCharlie` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 39: Lambda Function", code: `square = lambda x: x ** 2\nprint(square(4))`, output: `16` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 40: การใช้ map กับ Lambda", code: `numbers = [1, 2, 3, 4]\ndoubled = list(map(lambda x: x * 2, numbers))\nprint(doubled)`, output: `[2, 4, 6, 8]` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 41: การใช้ filter กับ Lambda", code: `numbers = [1, 2, 3, 4, 5, 6]\nevens = list(filter(lambda x: x % 2 == 0, numbers))\nprint(evens)`, output: `[2, 4, 6]` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 42: การสร้างคลาสและเมธอดเบื้องต้น", code: `class Dog:\n    def __init__(self, name):\n        self.name = name\n    def bark(self):\n        return self.name + " says Woof!"\nmy_dog = Dog("Buddy")\nprint(my_dog.bark())`, output: `Buddy says Woof!` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 43: คลาสพร้อมเมธอดแนะนำตัว (f-string)", code: `class Person:\n    def __init__(self, name, age):\n        self.name = name\n        self.age = age\n    def introduce(self):\n        print(f"Hi, I am {self.name} and I am {self.age} years old.")\np = Person("Anna", 25)\np.introduce()`, output: `Hi, I am Anna and I am 25 years old.` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 44: การเรียกใช้งานโมดูล math", code: `import math\nprint(math.sqrt(16))\nprint(math.pi)`, output: `4.0\n3.141592653589793` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 45: การใช้งานโมดูล random", code: `import random\nprint(random.randint(1, 10))`, output: `(Random number 1-10)` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 46: การใช้งานโมดูล datetime", code: `import datetime\nnow = datetime.datetime.now()\nprint("Current year:", now.year)`, output: `Current year: 2026` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 47: การเขียนไฟล์ข้อความ", code: `with open("sample.txt", "w") as f:\n    f.write("Hello, File!")`, output: `(File sample.txt written successfully)` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 48: การอ่านไฟล์ข้อความ", code: `with open("sample.txt", "r") as f:\n    content = f.read()\n    print(content)`, output: `Hello, File!` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 49: การใช้งานโมดูล os", code: `import os\nprint(os.getcwd())`, output: `/current/working/directory` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 50: ฟังก์ชันเรียกตัวเอง (Factorial)", code: `def factorial(n):\n    if n == 1:\n        return 1\n    return n * factorial(n - 1)\nprint(factorial(5))`, output: `120` }
         ];
 
         let snippetIndex = 0;
@@ -1197,7 +1203,7 @@
                     
                     const codeSpan = document.createElement('span');
                     codeSpan.style.cssText = 'color: #8b949e; font-size: 0.75rem; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
-                    codeSpan.innerText = item.code.replace(/\\n/g, ' ');
+                    codeSpan.innerText = item.code.replace(/\n/g, ' ');
 
                     btn.appendChild(titleSpan);
                     btn.appendChild(codeSpan);
@@ -1339,8 +1345,14 @@
 
             for (let i = 0; i < sampleText.length; i++) {
                 const span = document.createElement('span');
-                span.innerText = sampleText[i];
-                span.className = 'char';
+                const char = sampleText[i];
+                if (char === '\n') {
+                    span.innerText = '\n';
+                    span.className = 'char newline-char';
+                } else {
+                    span.innerText = char;
+                    span.className = 'char';
+                }
                 if (i === 0) span.classList.add('current');
                 targetBox.appendChild(span);
             }
@@ -1542,7 +1554,7 @@
             if (currentIndex >= sampleText.length) return;
 
             let inputChar = e.key;
-            if (inputChar === 'Enter') inputChar = '\\n';
+            if (inputChar === 'Enter') inputChar = '\n';
 
             if (hasErrorInCurrentPos) {
                 triggerErrorFlash();
@@ -1563,7 +1575,7 @@
                 activeSpan.classList.add('correct');
                 
                 playTypeSound(true);
-                createFallingChar(expectedChar, true, activeSpan);
+                createFallingChar(expectedChar === '\n' ? 'Enter' : expectedChar, true, activeSpan);
                 if (keyElement) createFallingChar(e.key, true, keyElement);
 
                 currentIndex++;
@@ -1583,7 +1595,7 @@
                 activeSpan.classList.add('incorrect');
                 
                 playTypeSound(false);
-                createFallingChar(inputChar, false, activeSpan);
+                createFallingChar(inputChar === '\n' ? 'Enter' : inputChar, false, activeSpan);
                 if (keyElement) keyElement.classList.add('active-incorrect');
 
                 incorrectCount++;
