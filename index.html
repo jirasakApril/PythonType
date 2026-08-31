@@ -672,13 +672,6 @@
             animation: blink 1s infinite;
         }
         
-        .char.newline-char::after {
-            content: "↵";
-            opacity: 0.35;
-            margin-left: 4px;
-            font-size: 0.85rem;
-        }
-        
         @keyframes blink {
             50% { border-color: transparent; }
         }
@@ -1410,7 +1403,7 @@
         function createFallingChar(char, isCorrect, targetElement) {
             if (!targetElement) return;
             const fallingDiv = document.createElement('div');
-            fallingDiv.innerText = char === ' ' ? ' ' : (char === 'Enter' ? '↵' : char);
+            fallingDiv.innerText = char === ' ' ? ' ' : (char === 'Enter' ? '' : char);
             fallingDiv.className = 'falling-char';
             fallingDiv.style.color = isCorrect ? getComputedStyle(document.body).getPropertyValue('--theme-color').trim() : '#ff6b6b';
 
@@ -1467,14 +1460,12 @@
         }
 
         window.addEventListener('keydown', (e) => {
-            // Check for Ctrl+H or Cmd+H to open Chapter Selector
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'h') {
                 e.preventDefault();
                 openChapterModal();
                 return;
             }
 
-            // ควบคุม Intro Screen
             if (!introScreen.classList.contains('hide')) {
                 if (e.code === 'Space' || e.key === 'Enter') {
                     e.preventDefault();
