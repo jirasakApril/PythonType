@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -813,7 +814,7 @@
     <div class="menu-screen hide" id="menuScreen">
         <div class="terminal-box floating-ui">
             <h1>-PYTYPE-</h1>
-            <p>[ SECURE KERNEL // 50 PYTHON PAYLOADS ]</p>
+            <p>[ SECURE KERNEL // 50 PYTHON PAYLOADS ]<br><span style="font-size: 0.8rem; color: var(--theme-color);">[Tip: กด Ctrl+H หรือ Cmd+H เพื่อเลือกบทเรียนได้ตลอดเวลา]</span></p>
             <div class="menu-buttons">
                 <button class="prog-btn" id="startBtn">[ PLAY ]</button>
                 <button class="prog-btn" id="optionsBtn">[ OPTIONS ]</button>
@@ -822,6 +823,7 @@
         </div>
     </div>
 
+    <!-- Options Modal -->
     <div class="options-modal" id="optionsModal">
         <div class="options-content">
             <h2>// KERNEL_CONFIG & THEME</h2>
@@ -870,6 +872,17 @@
         </div>
     </div>
 
+    <!-- Chapter & Snippet Selection Modal (Ctrl + H) -->
+    <div class="options-modal" id="chapterModal">
+        <div class="options-content" style="width: 580px; max-height: 82vh; display: flex; flex-direction: column;">
+            <h2>// SELECT PAYLOAD & CHAPTER (Ctrl+H)</h2>
+            <div id="chapterListContainer" style="overflow-y: auto; max-height: 52vh; padding-right: 8px; margin-bottom: 20px;">
+                <!-- Populated dynamically -->
+            </div>
+            <button class="close-opt-btn" id="closeChapterBtn">[ CLOSE & RETURN ]</button>
+        </div>
+    </div>
+
     <div class="app-screen" id="appScreen">
         <button class="menu-back-btn" id="menuBackBtn">[← KERNEL MENU]</button>
 
@@ -886,7 +899,7 @@
         <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
             <h1 class="main-title">Python Syntax Typing Test</h1>
             <div class="snippet-badge" id="snippetBadge">ข้อที่ 1/50: หมวดที่ 1</div>
-            <div class="instructions">พิมพ์คำสั่ง Python ตามโจทย์ด้านล่างให้ถูกต้องทุกตัวอักษร (กด Tab เพื่อช่วยข้ามช่องว่างย่อหน้าได้)</div>
+            <div class="instructions">พิมพ์คำสั่ง Python ตามโจทย์ด้านล่างให้ถูกต้องทุกตัวอักษร (กด Tab เพื่อช่วยข้ามช่องว่าง | กด <strong>Ctrl+H</strong> เพื่อเลือกบทเรียน)</div>
 
             <div class="target-box" id="targetBox"></div>
 
@@ -1045,6 +1058,7 @@
         const introScreen = document.getElementById('introScreen');
         const menuScreen = document.getElementById('menuScreen');
         const optionsModal = document.getElementById('optionsModal');
+        const chapterModal = document.getElementById('chapterModal');
         const appScreen = document.getElementById('appScreen');
         const targetBox = document.getElementById('targetBox');
         const keyboardBox = document.getElementById('keyboard');
@@ -1053,6 +1067,7 @@
         const nextStepBtn = document.getElementById('nextStepBtn');
         const statsPanelRight = document.getElementById('statsPanelRight');
         const snippetBadge = document.getElementById('snippetBadge');
+        const chapterListContainer = document.getElementById('chapterListContainer');
         
         const musicToggleCheckbox = document.getElementById('musicToggleCheckbox');
         const musicStatusText = document.getElementById('musicStatusText');
@@ -1097,6 +1112,7 @@
         document.getElementById('optionsBtn').addEventListener('click', openOptions);
         document.getElementById('exitBtn').addEventListener('click', exitApp);
         document.getElementById('closeOptBtn').addEventListener('click', closeOptions);
+        document.getElementById('closeChapterBtn').addEventListener('click', closeChapterModal);
         document.getElementById('menuBackBtn').addEventListener('click', backToMenu);
         document.getElementById('nextStepBtn').addEventListener('click', nextSnippet);
 
@@ -1127,10 +1143,10 @@
                 if (macFn) macFn.style.display = 'flex';
                 if (macCmdLeft) macCmdLeft.style.display = 'flex';
                 if (macCmdRight) macCmdRight.style.display = 'flex';
-                if (bottomKey4) bottomKey4.style.display = 'none'; // ซ่อนปุ่ม Ctrl ขวาสุดของ Windows
-                if (bottomKey1) { bottomKey1.innerText = '⌃'; bottomKey1.style.minWidth = '45px'; } // Control
-                if (bottomKey2) { bottomKey2.innerText = '⌥'; bottomKey2.style.minWidth = '45px'; } // Option (Alt)
-                if (bottomKey3) { bottomKey3.innerText = '⌥'; bottomKey3.style.minWidth = '45px'; } // Option (Alt)
+                if (bottomKey4) bottomKey4.style.display = 'none';
+                if (bottomKey1) { bottomKey1.innerText = '⌃'; bottomKey1.style.minWidth = '45px'; }
+                if (bottomKey2) { bottomKey2.innerText = '⌥'; bottomKey2.style.minWidth = '45px'; }
+                if (bottomKey3) { bottomKey3.innerText = '⌥'; bottomKey3.style.minWidth = '45px'; }
             } else {
                 if (macFn) macFn.style.display = 'none';
                 if (macCmdLeft) macCmdLeft.style.display = 'none';
@@ -1144,6 +1160,64 @@
 
         function openOptions() { optionsModal.classList.add('show'); }
         function closeOptions() { optionsModal.classList.remove('show'); }
+
+        function openChapterModal() {
+            initAudioContext();
+            renderChapterList();
+            chapterModal.classList.add('show');
+        }
+
+        function closeChapterModal() {
+            chapterModal.classList.remove('show');
+        }
+
+        function renderChapterList() {
+            chapterListContainer.innerHTML = '';
+            const categories = {};
+            pythonSnippets.forEach((snippet, index) => {
+                if (!categories[snippet.category]) {
+                    categories[snippet.category] = [];
+                }
+                categories[snippet.category].push({ ...snippet, index });
+            });
+
+            for (const [catName, snippets] of Object.entries(categories)) {
+                const catHeader = document.createElement('div');
+                catHeader.style.cssText = 'color: var(--theme-color); font-weight: bold; margin: 15px 0 8px 0; font-size: 0.95rem; text-shadow: 0 0 8px var(--theme-glow); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;';
+                catHeader.innerText = catName;
+                chapterListContainer.appendChild(catHeader);
+
+                snippets.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.className = 'prog-btn';
+                    btn.style.cssText = 'width: 100%; text-align: left; padding: 10px 14px; margin-bottom: 6px; font-size: 0.85rem; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02);';
+                    
+                    const titleSpan = document.createElement('span');
+                    titleSpan.innerText = `${item.index + 1}. ${item.title}`;
+                    
+                    const codeSpan = document.createElement('span');
+                    codeSpan.style.cssText = 'color: #8b949e; font-size: 0.75rem; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+                    codeSpan.innerText = item.code.replace(/\\n/g, ' ');
+
+                    btn.appendChild(titleSpan);
+                    btn.appendChild(codeSpan);
+
+                    btn.addEventListener('click', () => {
+                        snippetIndex = item.index;
+                        currentItem = pythonSnippets[snippetIndex];
+                        sampleText = currentItem.code;
+                        closeChapterModal();
+                        if (!appScreen.classList.contains('active')) {
+                            startApp();
+                        } else {
+                            resetGame();
+                        }
+                    });
+
+                    chapterListContainer.appendChild(btn);
+                });
+            }
+        }
 
         let audioCtx = null;
         let isMusicPlaying = false;
@@ -1275,6 +1349,7 @@
 
         function startApp() {
             optionsModal.classList.remove('show');
+            chapterModal.classList.remove('show');
             menuScreen.classList.add('hide');
             appScreen.classList.add('active');
             appActive = true;
@@ -1380,6 +1455,13 @@
         }
 
         window.addEventListener('keydown', (e) => {
+            // Check for Ctrl+H or Cmd+H to open Chapter Selector
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'h') {
+                e.preventDefault();
+                openChapterModal();
+                return;
+            }
+
             // ควบคุม Intro Screen
             if (!introScreen.classList.contains('hide')) {
                 if (e.code === 'Space' || e.key === 'Enter') {
@@ -1390,18 +1472,17 @@
             }
 
             if (!appActive) return;
+            if (chapterModal.classList.contains('show') || optionsModal.classList.contains('show')) return;
 
-            // ค้นหา Element ของปุ่มบนหน้าจอตามรหัสปุ่มกายภาพ (e.code รองรับ Mac สมบูรณ์)
             let keyElement = document.querySelector(`.key[data-key="${e.code}"]`);
 
-            // [อัปเดตสำหรับ Mac] อนุญาตให้ปุ่ม Modifier สว่างขึ้นเพื่อตอบสนองต่อผู้ใช้ MacBook
             const isModifier = ["Shift", "Control", "Alt", "Meta", "Escape", "Dead", "Fn"].includes(e.key) || 
                                e.code.startsWith("Fn") || e.code.startsWith("Meta") || 
                                e.code.startsWith("Alt") || e.code.startsWith("Control");
             
             if (isModifier) {
                 if (keyElement) keyElement.classList.add('active-correct');
-                return; // คืนค่าทันทีเพื่อไม่ให้นำ Modifier ไปนับเป็นการพิมพ์
+                return;
             }
 
             if (isDone) {
@@ -1515,7 +1596,6 @@
         });
 
         window.addEventListener('keyup', (e) => {
-            // คืนสถานะปุ่มเมื่อปล่อยนิ้ว รวมถึงปุ่มของ Mac ด้วย
             const keyElement = document.querySelector(`.key[data-key="${e.code}"]`);
             if (keyElement) {
                 keyElement.classList.remove('active-correct', 'active-incorrect');
