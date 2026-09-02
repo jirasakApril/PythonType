@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hacker Python Typing Test - Liquid Glass Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- โหลดไลบรารี Chart.js สำหรับวาดกราฟสถิติ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --theme-color: #00ff66;
@@ -264,33 +266,33 @@
             position: fixed;
             top: 50%;
             right: 25px;
-            transform: translateY(-50%) translateX(20px);
+            transform: translateY(-50%) translateX(40px) scale(0.95);
             background: var(--glass-bg);
             backdrop-filter: blur(20px) saturate(200%);
             -webkit-backdrop-filter: blur(20px) saturate(200%);
             border: 1px solid var(--glass-border);
-            padding: 22px 25px;
+            padding: 22px;
             border-radius: 20px;
             box-shadow: var(--glass-shadow), 0 0 30px rgba(0, 0, 0, 0.4);
-            width: 330px;
+            width: 360px;
             z-index: 90;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .stats-panel-right.show {
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
-            transform: translateY(-50%) translateX(0);
+            transform: translateY(-50%) translateX(0) scale(1);
         }
 
         .stats-panel-right h3 {
             color: var(--theme-color);
             margin-top: 0;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             font-size: 1rem;
             text-transform: uppercase;
             letter-spacing: 1.5px;
@@ -301,8 +303,8 @@
         }
 
         .stat-item {
-            font-size: 0.95rem;
-            margin-bottom: 12px;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             color: #8b949e;
@@ -311,6 +313,13 @@
         .stat-item span {
             color: var(--theme-color);
             font-weight: bold;
+        }
+
+        .chart-container {
+            margin-top: 15px;
+            position: relative;
+            width: 100%;
+            height: 140px;
         }
 
         .menu-screen {
@@ -345,6 +354,7 @@
             max-width: 520px;
             width: 90%;
             z-index: 10;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .terminal-box h1 {
@@ -425,7 +435,7 @@
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .options-modal.show {
@@ -444,6 +454,12 @@
             width: 380px;
             box-shadow: var(--glass-shadow), 0 0 40px var(--theme-glow);
             text-align: left;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .options-modal.show .options-content {
+            transform: scale(1) translateY(0);
         }
 
         .options-content h2 {
@@ -882,17 +898,31 @@
         </div>
     </div>
 
+    <!-- AFK System Modal -->
+    <div class="options-modal" id="afkModal" style="z-index: 400;">
+        <div class="options-content" style="text-align: center; width: 400px; animation: floatAndRotate 6s ease-in-out infinite;">
+            <h2 style="color: #ff6b6b; text-shadow: 0 0 15px rgba(255, 107, 107, 0.4); margin-bottom: 15px;">// SYSTEM IDLE //</h2>
+            <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.6;">ตรวจพบการไม่มีส่วนร่วมเกิน 10 วินาที<br>ระบบได้หยุดเวลาชั่วคราวเพื่อรักษาคะแนนความเร็ว (WPM)</p>
+            <button class="close-opt-btn" id="resumeAfkBtn" style="border-color: var(--theme-color); color: var(--theme-color);">[ RESUME KERNEL ]</button>
+        </div>
+    </div>
+
     <div class="app-screen" id="appScreen">
         <button class="menu-back-btn" id="menuBackBtn">[← KERNEL MENU]</button>
 
         <button class="next-step-btn" id="nextStepBtn">NEXT PAYLOAD &gt;&gt;</button>
 
+        <!-- STATS_LOG พร้อมกราฟแสดงผลแบบ Real-time -->
         <div class="stats-panel-right" id="statsPanelRight">
             <h3>// STATS_LOG</h3>
             <div class="stat-item">เวลา: <span id="statTime">0.0s</span></div>
             <div class="stat-item">ความเร็ว: <span id="statWpm">0 WPM</span></div>
             <div class="stat-item">ความเร็วอักษร: <span id="statCps">0 CPS</span></div>
             <div class="stat-item">ความแม่นยำ: <span id="statAccuracy">100%</span></div>
+            
+            <div class="chart-container">
+                <canvas id="statsChart"></canvas>
+            </div>
         </div>
 
         <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
@@ -995,7 +1025,6 @@
             { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 8: การสร้างและใช้งาน List", code: `fruits = ["apple", "banana", "cherry"]\nprint(fruits[1])`, output: `banana` },
             { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 9: การสร้างฟังก์ชันเบื้องต้น", code: `def greet(person):\n    return "Hello, " + person\nprint(greet("Somchai"))`, output: `Hello, Somchai` },
             { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 10: การแปลงชนิดข้อมูล (Type Conversion)", code: `birth_year = input("Enter birth year: ")\nage = 2026 - int(birth_year)\nprint("You are approximately", age, "years old.")`, output: `You are approximately [age] years old.` },
-
             { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 11: เงื่อนไขแบบหลายทางเลือก", code: `temperature = 30\nif temperature > 35:\n    print("Very hot")\nelif temperature >= 25:\n    print("Warm")\nelse:\n    print("Cool")`, output: `Warm` },
             { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 12: ตรวจสอบเลขคู่และเลขคี่", code: `num = int(input("Enter an integer: "))\nif num % 2 == 0:\n    print("Even number")\nelse:\n    print("Odd number")`, output: `Even number` },
             { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 13: Conditional Expression", code: `x = 10\ny = 20\nmaximum = x if x > y else y\nprint("Max is:", maximum)`, output: `Max is: 20` },
@@ -1006,7 +1035,6 @@
             { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 18: Nested Loop", code: `for i in range(2):\n    for j in range(2):\n        print(i, j)`, output: `0 0\n0 1\n1 0\n1 1` },
             { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 19: การจัดการข้อผิดพลาด (try-except)", code: `try:\n    val = int(input("Enter a number: "))\n    print(10 / val)\nexcept ZeroDivisionError:\n    print("Cannot divide by zero!")`, output: `Cannot divide by zero!` },
             { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 20: ตัวดำเนินการทางตรรกะ", code: `age = 18\nhas_id = True\nif age >= 18 and has_id:\n    print("Allowed to enter")`, output: `Allowed to enter` },
-
             { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 21: การเพิ่มข้อมูลใน List", code: `colors = ["red", "green", "blue"]\ncolors.append("yellow")\nprint(colors)`, output: `['red', 'green', 'blue', 'yellow']` },
             { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 22: การเรียงลำดับข้อมูลใน List", code: `numbers = [5, 2, 9, 1, 7]\nnumbers.sort()\nprint(numbers)`, output: `[1, 2, 5, 7, 9]` },
             { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 23: Nested List", code: `matrix = [[1, 2], [3, 4]]\nprint(matrix[0][1])`, output: `2` },
@@ -1022,7 +1050,6 @@
             { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 33: String Slicing", code: `text = "Hello Python"\nprint(text[0:5])`, output: `Hello` },
             { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 34: String Methods (strip และ title)", code: `text = " python programming "\nprint(text.strip().title())`, output: `Python Programming` },
             { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 35: การเชื่อมสตริงด้วย join", code: `words = ["Python", "is", "awesome"]\nsentence = " ".join(words)\nprint(sentence)`, output: `Python is awesome` },
-
             { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 36: ฟังก์ชันคำนวณพื้นที่", code: `def calculate_area(width, height):\n    return width * height\nprint(calculate_area(5, 10))`, output: `50` },
             { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 37: ฟังก์ชันที่มี Default Argument", code: `def power(base, exponent=2):\n    return base ** exponent\nprint(power(3))\nprint(power(2, 3))`, output: `9\n8` },
             { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 38: พารามิเตอร์ไม่จำกัดจำนวน (*args)", code: `def print_names(*names):\n    for name in names:\n        print(name)\nprint_names("Alice", "Bob", "Charlie")`, output: `Alice\nBob\nCharlie` },
@@ -1053,6 +1080,14 @@
         let startTime = null;
         let isStarted = false;
         let appActive = false;
+        let statsInterval = null;
+
+        // == ตัวแปรสำหรับระบบ AFK ==
+        let afkTimer = null;
+        const AFK_DELAY = 10000; // 10 วินาที
+        let afkStartTime = 0;    
+        const afkModal = document.getElementById('afkModal');
+        const resumeAfkBtn = document.getElementById('resumeAfkBtn');
 
         const introScreen = document.getElementById('introScreen');
         const menuScreen = document.getElementById('menuScreen');
@@ -1078,6 +1113,96 @@
         const statCps = document.getElementById('statCps');
         const statAccuracy = document.getElementById('statAccuracy');
 
+        // == ตั้งค่า Chart.js พร้อมอนิเมชั่นกราฟแบบ Smooth ==
+        const chartCtx = document.getElementById('statsChart').getContext('2d');
+        const statsChart = new Chart(chartCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'WPM History',
+                    data: [],
+                    borderColor: '#00ff66',
+                    backgroundColor: 'rgba(0, 255, 102, 0.1)',
+                    borderWidth: 2,
+                    pointRadius: 2,
+                    pointHoverRadius: 5,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 400,
+                    easing: 'easeOutQuart'
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        suggestedMax: 100,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#888', font: { size: 10 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#888', font: { size: 9 }, maxTicksLimit: 8 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        function updateChartTheme() {
+            const currentThemeColor = getComputedStyle(document.body).getPropertyValue('--theme-color').trim();
+            const currentThemeDim = getComputedStyle(document.body).getPropertyValue('--theme-dim').trim();
+            statsChart.data.datasets[0].borderColor = currentThemeColor;
+            statsChart.data.datasets[0].backgroundColor = currentThemeDim;
+            statsChart.update();
+        }
+
+        // ==== ฟังก์ชันรีเซ็ตและล้างกราฟเมื่อเริ่มข้อใหม่ ====
+        function resetChartData() {
+            statsChart.data.labels = [];
+            statsChart.data.datasets[0].data = [];
+            statsChart.update();
+        }
+
+        // ==== ฟังก์ชันระบบ AFK ====
+        function showAfkModal() {
+            if (!introScreen.classList.contains('hide') || isDone) return;
+            afkModal.classList.add('show');
+            if (isStarted) {
+                afkStartTime = new Date().getTime();
+            }
+        }
+
+        function hideAfkModal() {
+            afkModal.classList.remove('show');
+            if (isStarted && afkStartTime > 0) {
+                const afkDuration = new Date().getTime() - afkStartTime;
+                startTime += afkDuration;
+                afkStartTime = 0;
+            }
+            resetAfkTimer();
+        }
+
+        function resetAfkTimer() {
+            clearTimeout(afkTimer);
+            if (!afkModal.classList.contains('show')) {
+                afkTimer = setTimeout(showAfkModal, AFK_DELAY);
+            }
+        }
+
+        ['mousemove', 'mousedown', 'touchstart', 'click'].forEach(evt => {
+            window.addEventListener(evt, resetAfkTimer);
+        });
+
+        resumeAfkBtn.addEventListener('click', hideAfkModal);
+
         function runIntroTypingEffect() {
             const titleText = "-PYTYPE-";
             const titleElem = document.getElementById('introTitle');
@@ -1097,12 +1222,16 @@
             typeTitle();
         }
 
-        window.addEventListener('DOMContentLoaded', () => { runIntroTypingEffect(); });
+        window.addEventListener('DOMContentLoaded', () => { 
+            runIntroTypingEffect(); 
+            resetAfkTimer(); 
+        });
 
         function enterSystem() {
             initAudioContext();
             introScreen.classList.add('hide');
             menuScreen.classList.remove('hide');
+            resetAfkTimer();
         }
 
         introScreen.addEventListener('click', enterSystem);
@@ -1115,7 +1244,10 @@
         document.getElementById('menuBackBtn').addEventListener('click', backToMenu);
         document.getElementById('nextStepBtn').addEventListener('click', nextSnippet);
 
-        document.getElementById('themeSelect').addEventListener('change', function() { handleThemeChange(this); });
+        document.getElementById('themeSelect').addEventListener('change', function() { 
+            handleThemeChange(this); 
+            updateChartTheme();
+        });
         document.getElementById('keyboardLayoutSelect').addEventListener('change', function() { handleKeyboardLayoutChange(this); });
         document.getElementById('musicToggleCheckbox').addEventListener('change', function() { handleMusicToggle(this); });
         document.getElementById('volumeSlider').addEventListener('input', function() { handleVolumeChange(this); });
@@ -1373,10 +1505,54 @@
             setTimeout(() => { window.location.href = "about:blank"; }, 100);
         }
 
+        // == ฟังก์ชันเริ่มจับเวลาและแสดง STATS_LOG พร้อมบันทึกกราฟแบบ Real-time ทีละช่วงเวลา ==
         function startTimer() {
-            if (!isStarted) { isStarted = true; startTime = new Date().getTime(); }
+            if (!isStarted) { 
+                isStarted = true; 
+                startTime = new Date().getTime(); 
+                resetChartData(); // เคลียร์และเริ่มกราฟใหม่สำหรับข้อนี้ทันทีที่พิมพ์
+                statsPanelRight.classList.add('show'); // แสดงแผงสถิติทันที
+                if (statsInterval) clearInterval(statsInterval);
+                statsInterval = setInterval(updateLiveStats, 500); // อัปเดตสถิติและจุดกราฟทุก 0.5 วินาที
+            }
         }
-        function stopTimer() { isStarted = false; }
+
+        function stopTimer() { 
+            isStarted = false; 
+            if (statsInterval) {
+                clearInterval(statsInterval);
+                statsInterval = null;
+            }
+        }
+
+        function updateLiveStats() {
+            if (!isStarted || isDone) return;
+            const now = new Date().getTime();
+            const totalSeconds = ((now - startTime) / 1000).toFixed(1);
+            const totalChars = correctCount;
+            const words = totalChars / 5;
+            const minutes = totalSeconds / 60;
+            const wpm = minutes > 0 ? Math.round(words / minutes) : 0;
+            const cps = totalSeconds > 0 ? (totalChars / totalSeconds).toFixed(1) : 0;
+            const totalAttempts = correctCount + incorrectCount;
+            const accuracy = totalAttempts > 0 ? Math.max(0, Math.round((correctCount / totalAttempts) * 100)) : 100;
+
+            statTime.innerText = `${totalSeconds}s`;
+            statWpm.innerText = `${wpm} WPM`;
+            statCps.innerText = `${cps} CPS`;
+            statAccuracy.innerText = `${accuracy}%`;
+
+            // บันทึกข้อมูลลงกราฟแบบ Real-time ต่อเนื่องในข้อปัจจุบัน
+            statsChart.data.labels.push(`${totalSeconds}s`);
+            statsChart.data.datasets[0].data.push(wpm);
+            
+            // จำกัดจำนวนจุดบนกราฟไม่ให้ล้นเกินไป
+            if (statsChart.data.labels.length > 25) {
+                statsChart.data.labels.shift();
+                statsChart.data.datasets[0].data.shift();
+            }
+            statsChart.update();
+        }
 
         function resetGame() {
             stopTimer();
@@ -1385,6 +1561,7 @@
             incorrectCount = 0;
             hasErrorInCurrentPos = false;
             isDone = false;
+            resetChartData(); // ล้างข้อมูลกราฟเก่าทันทีเมื่อเริ่มข้อใหม่
             initText();
         }
 
@@ -1427,6 +1604,7 @@
         }
 
         function showCompletionStats() {
+            stopTimer();
             const endTime = new Date().getTime();
             const totalSeconds = ((endTime - startTime) / 1000).toFixed(1);
             const totalChars = sampleText.length;
@@ -1460,7 +1638,16 @@
         }
 
         window.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === '.') {
+            if (afkModal.classList.contains('show')) {
+                if (e.key === 'Enter' || e.code === 'Space' || e.key === 'Escape') {
+                    hideAfkModal();
+                }
+                e.preventDefault();
+                return;
+            }
+            resetAfkTimer();
+
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'h') {
                 e.preventDefault();
                 openChapterModal();
                 return;
@@ -1544,6 +1731,9 @@
 
             if (currentIndex >= sampleText.length) return;
 
+            // เริ่มจับสถิติทันทีที่กดพิมพ์ตัวอักษรแรก (รวมถึงตัวที่พิมพ์ผิดด้วย)
+            startTimer();
+
             let inputChar = e.key;
             if (inputChar === 'Enter') inputChar = '\n';
 
@@ -1557,7 +1747,6 @@
                 return;
             }
 
-            startTimer();
             const expectedChar = sampleText[currentIndex];
             const activeSpan = charSpans[currentIndex];
             
