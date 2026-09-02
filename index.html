@@ -7,8 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <!-- โหลดไลบรารี Chart.js สำหรับวาดกราฟสถิติ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- โหลดไลบรารี GSAP สำหรับแอนิเมชันขั้นสูง -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
         :root {
             --theme-color: #00ff66;
@@ -69,6 +67,13 @@
             justify-content: center;
             z-index: 999;
             cursor: pointer;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s ease;
+        }
+
+        .intro-screen.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
 
         .click-enter-container {
@@ -116,13 +121,63 @@
             51%, 100% { opacity: 0; }
         }
 
+        @keyframes floatAndRotate {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(0.35deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        .floating-ui {
+            animation: floatAndRotate 6s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(0, 0); }
+            20% { transform: translate(-6px, 2px); }
+            40% { transform: translate(6px, -2px); }
+            60% { transform: translate(-4px, -1px); }
+            80% { transform: translate(4px, 1px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .shake-effect { animation: shake 0.25s ease-in-out; }
+
+        @keyframes uiRedFlash {
+            0% { 
+                background-color: rgba(255, 0, 0, 0);
+                box-shadow: var(--glass-shadow);
+                border-color: var(--glass-border);
+            }
+            30% { 
+                background-color: rgba(255, 0, 0, 0.22);
+                box-shadow: var(--glass-shadow), 0 0 50px rgba(255, 0, 0, 0.85), inset 0 0 30px rgba(255, 0, 0, 0.6);
+                border-color: #ff4d4d;
+            }
+            100% { 
+                background-color: rgba(255, 0, 0, 0);
+                box-shadow: var(--glass-shadow);
+                border-color: var(--glass-border);
+            }
+        }
+
+        .red-flash-effect { animation: uiRedFlash 0.3s ease-in-out; }
+
         .screen-flash-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 0, 0, 0);
             pointer-events: none;
             z-index: 999;
+            transition: background 0.1s ease;
         }
+
+        @keyframes screenFlashAnim {
+            0% { background: rgba(255, 0, 0, 0); }
+            35% { background: rgba(255, 0, 0, 0.28); }
+            100% { background: rgba(255, 0, 0, 0); }
+        }
+
+        .screen-flash-active { animation: screenFlashAnim 0.3s ease-in-out; }
 
         .matrix-bg-char {
             position: fixed;
@@ -136,6 +191,12 @@
             pointer-events: none;
             z-index: 5;
             opacity: 0.6;
+            animation: matrixFall linear forwards;
+        }
+
+        @keyframes matrixFall {
+            0% { transform: translateY(0); opacity: 0.7; }
+            100% { transform: translateY(105vh); opacity: 0; }
         }
 
         .menu-back-btn {
@@ -153,8 +214,8 @@
             border-radius: 12px;
             cursor: pointer;
             box-shadow: var(--glass-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 50;
-            transition: color 0.3s, border-color 0.3s, background 0.3s;
         }
 
         .menu-back-btn:hover {
@@ -162,32 +223,7 @@
             border-color: var(--theme-color);
             background: var(--theme-dim);
             box-shadow: 0 0 20px var(--theme-glow), var(--glass-shadow);
-        }
-
-        .random-btn {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            font-family: 'Fira Code', monospace;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            color: #94a3b8;
-            border: 1px solid var(--glass-border);
-            padding: 12px 22px;
-            font-size: 0.9rem;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: var(--glass-shadow);
-            z-index: 100;
-            transition: color 0.3s, border-color 0.3s, background 0.3s;
-        }
-
-        .random-btn:hover {
-            color: var(--theme-color);
-            border-color: var(--theme-color);
-            background: var(--theme-dim);
-            box-shadow: 0 0 20px var(--theme-glow), var(--glass-shadow);
+            transform: translateY(-2px);
         }
 
         .next-step-btn {
@@ -209,19 +245,28 @@
             z-index: 100;
             opacity: 0;
             visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .next-step-btn.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
         }
 
         .next-step-btn:hover {
             background-color: var(--theme-color);
             color: #0d1117;
             box-shadow: 0 0 35px var(--theme-glow), var(--glass-shadow);
+            transform: scale(1.05) translateY(-2px);
         }
 
         .stats-panel-right {
             position: fixed;
             top: 50%;
             right: 25px;
-            transform: translateY(-50%);
+            transform: translateY(-50%) translateX(40px) scale(0.95);
             background: var(--glass-bg);
             backdrop-filter: blur(20px) saturate(200%);
             -webkit-backdrop-filter: blur(20px) saturate(200%);
@@ -234,12 +279,14 @@
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .stats-panel-right.show {
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
+            transform: translateY(-50%) translateX(0) scale(1);
         }
 
         .stats-panel-right h3 {
@@ -286,6 +333,10 @@
             align-items: center;
             justify-content: center;
             z-index: 200;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .menu-screen.hide {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
@@ -303,6 +354,7 @@
             max-width: 520px;
             width: 90%;
             z-index: 10;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .terminal-box h1 {
@@ -340,8 +392,8 @@
             border-radius: 12px;
             cursor: pointer;
             box-shadow: var(--glass-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             letter-spacing: 1px;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
         }
 
         .prog-btn:hover {
@@ -349,6 +401,14 @@
             color: #0d1117;
             border-color: var(--theme-color);
             box-shadow: 0 0 25px var(--theme-glow), var(--glass-shadow);
+            transform: scale(1.03) translateY(-2px);
+        }
+
+        .prog-btn:active, .next-step-btn:active, .menu-back-btn:active, .close-opt-btn:active {
+            transform: scale(0.94) translateY(3px) !important;
+            box-shadow: 0 0 10px var(--theme-glow), inset 0 3px 6px rgba(0, 0, 0, 0.6) !important;
+            filter: brightness(0.9);
+            transition: transform 0.06s ease, box-shadow 0.06s ease;
         }
 
         .prog-btn.exit-btn {
@@ -375,6 +435,13 @@
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .options-modal.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
         }
 
         .options-content {
@@ -387,6 +454,12 @@
             width: 380px;
             box-shadow: var(--glass-shadow), 0 0 40px var(--theme-glow);
             text-align: left;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .options-modal.show .options-content {
+            transform: scale(1) translateY(0);
         }
 
         .options-content h2 {
@@ -495,6 +568,10 @@
             transform: scale(1.3);
             box-shadow: 0 0 22px var(--theme-color), 0 0 10px var(--theme-glow);
         }
+        input[type=range]::-webkit-slider-thumb:active {
+            transform: scale(0.9);
+            box-shadow: 0 0 6px var(--theme-color);
+        }
 
         .close-opt-btn {
             width: 100%;
@@ -508,12 +585,13 @@
             font-weight: bold;
             cursor: pointer;
             box-shadow: var(--glass-shadow);
-            transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .close-opt-btn:hover {
             background: var(--theme-color);
             color: #0d1117;
             box-shadow: 0 0 20px var(--theme-glow), var(--glass-shadow);
+            transform: translateY(-2px);
         }
 
         .app-screen {
@@ -526,10 +604,17 @@
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
+            transition: opacity 0.4s ease;
             background: rgba(3, 8, 4, 0.2);
             padding: 20px;
             box-sizing: border-box;
             z-index: 100;
+        }
+
+        .app-screen.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
         }
 
         h1.main-title {
@@ -582,6 +667,7 @@
             min-height: 60px;
             display: block;
             line-height: 1.7;
+            transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease, opacity 0.15s ease;
         }
 
         .char { color: #64748b; }
@@ -599,6 +685,11 @@
             background-color: rgba(255, 255, 255, 0.15);
             border-left: 2.5px solid #ffffff;
             border-radius: 2px;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            50% { border-color: transparent; }
         }
 
         .secret-output-box {
@@ -640,6 +731,7 @@
             border: 1px solid var(--glass-border);
             z-index: 10;
             position: relative;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
         }
 
         .row {
@@ -663,6 +755,7 @@
             font-weight: bold;
             user-select: none;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 1px rgba(255,255,255,0.1);
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
 
@@ -677,14 +770,32 @@
             background-color: var(--theme-color) !important;
             color: #0d1117 !important;
             border-color: var(--theme-color) !important;
+            transform: scale(0.94);
             box-shadow: 0 0 20px var(--theme-glow), inset 0 2px 4px rgba(0,0,0,0.2);
         }
 
+        @keyframes keyRedFlashAnim {
+            0% {
+                background-color: #ff6b6b;
+                transform: scale(0.92);
+                box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+            }
+            50% {
+                background-color: #ff0033;
+                transform: scale(0.96);
+                box-shadow: 0 0 25px rgba(255, 0, 51, 0.9), inset 0 2px 4px rgba(0,0,0,0.4);
+            }
+            100% {
+                background-color: #ff6b6b;
+                transform: scale(0.92);
+                box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+            }
+        }
+
         .key.active-incorrect {
-            background-color: #ff6b6b !important;
+            animation: keyRedFlashAnim 0.25s ease-in-out infinite !important;
             color: #0d1117 !important;
             border-color: #ff4d4d !important;
-            box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
         }
 
         .falling-char {
@@ -694,12 +805,18 @@
             font-weight: bold;
             pointer-events: none;
             z-index: 100;
+            animation: fallAnimation 1s linear forwards;
+        }
+
+        @keyframes fallAnimation {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translate(var(--rand-x), 350px) rotate(var(--rand-rot)) scale(0.5); opacity: 0; }
         }
     </style>
 </head>
 <body>
     <div class="intro-screen" id="introScreen">
-        <div class="click-enter-container" id="introContainer">
+        <div class="click-enter-container floating-ui">
             <h1 id="introTitle"></h1>
             <p id="introDesc">Click anywhere or press [ Spacebar ] to initialize secure environment</p>
         </div>
@@ -708,10 +825,10 @@
     <!-- Full screen red flash overlay element -->
     <div class="screen-flash-overlay" id="screenFlashOverlay"></div>
 
-    <div class="menu-screen" id="menuScreen">
-        <div class="terminal-box" id="terminalBox">
-            <h1>--</h1>
-            <p>[ SECURE KERNEL // PYTHON PAYLOADS ]<br><span style="font-size: 0.8rem; color: var(--theme-color);"></span></p>
+    <div class="menu-screen hide" id="menuScreen">
+        <div class="terminal-box floating-ui">
+            <h1>-PYTYPE-</h1>
+            <p>[ SECURE KERNEL // 50 PYTHON PAYLOADS ]<br><span style="font-size: 0.8rem; color: var(--theme-color);"></span></p>
             <div class="menu-buttons">
                 <button class="prog-btn" id="startBtn">[ PLAY ]</button>
                 <button class="prog-btn" id="optionsBtn">[ OPTIONS ]</button>
@@ -721,7 +838,7 @@
     </div>
 
     <div class="options-modal" id="optionsModal">
-        <div class="options-content" id="optionsContent">
+        <div class="options-content">
             <h2>// KERNEL_CONFIG & THEME</h2>
             
             <div class="option-group">
@@ -770,7 +887,7 @@
 
     <!-- Chapter & Snippet Selection Modal (Alt + H) -->
     <div class="options-modal" id="chapterModal">
-        <div class="options-content" id="chapterContent" style="width: 580px; max-height: 82vh; display: flex; flex-direction: column;">
+        <div class="options-content" style="width: 580px; max-height: 82vh; display: flex; flex-direction: column;">
             <h2>// SELECT PAYLOAD & CHAPTER (Alt+H)</h2>
             <div id="chapterListContainer" style="overflow-y: auto; max-height: 52vh; padding-right: 8px; margin-bottom: 20px;">
                 <!-- Populated dynamically -->
@@ -780,18 +897,17 @@
     </div>
 
     <!-- AFK System Modal -->
-    <div class="options-modal" id="afkModal" style="z-index: 400; cursor: pointer;">
-        <div class="options-content" id="afkContent" style="text-align: center; width: 400px; pointer-events: none;">
+    <div class="options-modal" id="afkModal" style="z-index: 400;">
+        <div class="options-content" style="text-align: center; width: 400px; animation: floatAndRotate 6s ease-in-out infinite;">
             <h2 style="color: #ff6b6b; text-shadow: 0 0 15px rgba(255, 107, 107, 0.4); margin-bottom: 15px;">// SYSTEM IDLE //</h2>
-            <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 10px; line-height: 1.6;">ตรวจพบการไม่มีส่วนร่วมเกิน 10 วินาที<br>ระบบได้หยุดเวลาชั่วคราวเพื่อรักษาคะแนนความเร็ว (WPM)</p>
-            <p style="color: var(--theme-color); font-size: 0.85rem; animation: cursorBlink 1.5s infinite; margin-top: 20px;">[ คลิกซ้าย, Spacebar หรือ Enter เพื่อดำเนินการต่อ ]</p>
+            <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.6;">ตรวจพบการไม่มีส่วนร่วมเกิน 10 วินาที<br>ระบบได้หยุดเวลาชั่วคราวเพื่อรักษาคะแนนความเร็ว (WPM)</p>
+            <button class="close-opt-btn" id="resumeAfkBtn" style="border-color: var(--theme-color); color: var(--theme-color);">[ RESUME KERNEL ]</button>
         </div>
     </div>
 
     <div class="app-screen" id="appScreen">
         <button class="menu-back-btn" id="menuBackBtn">[← KERNEL MENU]</button>
 
-        <button class="random-btn" id="randomStepBtn">[⚄ สุ่มโจทย์ใหม่ ]</button>
         <button class="next-step-btn" id="nextStepBtn">NEXT PAYLOAD &gt;&gt;</button>
 
         <!-- STATS_LOG พร้อมกราฟแสดงผลแบบ Real-time -->
@@ -809,10 +925,10 @@
 
         <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
             <h1 class="main-title">Python Syntax Typing Test</h1>
-            <div class="snippet-badge" id="snippetBadge">Payload 1: หมวดที่ 1</div>
-            <div class="instructions">พิมพ์คำสั่ง Python ตามโจทย์ด้านล่างให้ถูกต้องทุกตัวอักษร ( กด Tab เพื่อช่วยข้ามช่องว่าง )</div>
+            <div class="snippet-badge" id="snippetBadge">ข้อที่ 1/50: หมวดที่ 1</div>
+            <div class="instructions">พิมพ์คำสั่ง Python ตามโจทย์ด้านล่างให้ถูกต้องทุกตัวอักษร (กด Tab เพื่อช่วยข้ามช่องว่าง | กด <strong>Alt+H</strong> เพื่อเลือกบทเรียน)</div>
 
-            <div class="target-box" id="targetBox"></div>   
+            <div class="target-box" id="targetBox"></div>
 
             <div class="secret-output-box" id="secretOutputBox">
                 <div class="output-label">// Terminal Output (Live):</div>
@@ -899,70 +1015,59 @@
 
     <script>
         const pythonSnippets = [
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "การแสดงผลข้อความพื้นฐาน", code: `print("Hello, World")`, output: `Hello, World` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "การประกาศตัวแปรและแสดงผล", code: `name = "Python"\nprint("Welcome to " + name)`, output: `Welcome to Python` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "การรับค่าจากผู้ใช้", code: `username = input("Enter your name: ")\nprint("Hello, " + username)`, output: `Hello, [username]` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "การคำนวณทางคณิตศาสตร์เบื้องต้น", code: `a = 10\nb = 5\nprint("Sum:", a + b)`, output: `Sum: 15` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "เงื่อนไข if-else พื้นฐาน", code: `score = 75\nif score >= 50:\n    print("Passed")\nelse:\n    print("Failed")`, output: `Passed` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "การใช้ลูป for วนซ้ำตามช่วงตัวเลข", code: `for i in range(1, 6):\n    print("Number:", i)`, output: `Number: 1\nNumber: 2\nNumber: 3\nNumber: 4\nNumber: 5` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "การใช้ลูป while", code: `count = 3\nwhile count > 0:\n    print(count)\n    count -= 1\nprint("Liftoff!")`, output: `3\n2\n1\nLiftoff!` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "การสร้างและใช้งาน List", code: `fruits = ["apple", "banana", "cherry"]\nprint(fruits[1])`, output: `banana` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "การสร้างฟังก์ชันเบื้องต้น", code: `def greet(person):\n    return "Hello, " + person\nprint(greet("Somchai"))`, output: `Hello, Somchai` },
-            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "การแปลงชนิดข้อมูล (Type Conversion)", code: `birth_year = input("Enter birth year: ")\nage = 2026 - int(birth_year)\nprint("You are approximately", age, "years old.")`, output: `You are approximately [age] years old.` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "เงื่อนไขแบบหลายทางเลือก", code: `temperature = 30\nif temperature > 35:\n    print("Very hot")\nelif temperature >= 25:\n    print("Warm")\nelse:\n    print("Cool")`, output: `Warm` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ตรวจสอบเลขคู่และเลขคี่", code: `num = int(input("Enter an integer: "))\nif num % 2 == 0:\n    print("Even number")\nelse:\n    print("Odd number")`, output: `Even number` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "Conditional Expression", code: `x = 10\ny = 20\nmaximum = x if x > y else y\nprint("Max is:", maximum)`, output: `Max is: 20` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ลูปตรวจสอบรหัสผ่าน", code: `password = ""\nwhile password != "secret":\n    password = input("Enter password: ")\nprint("Access Granted!")`, output: `Access Granted!` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "วนลูปแสดงตัวอักษรในสตริง", code: `for char in "Python":\n    print(char)`, output: `P\ny\nt\nh\no\nn` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "การใช้งานคำสั่ง break", code: `for i in range(1, 11):\n    if i == 6:\n        break\n    print(i)`, output: `1\n2\n3\n4\n5` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "Nested Loop", code: `for i in range(2):\n    for j in range(2):\n        print(i, j)`, output: `0 0\n0 1\n1 0\n1 1` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "การจัดการข้อผิดพลาด (try-except)", code: `try:\n    val = int(input("Enter a number: "))\n    print(10 / val)\nexcept ZeroDivisionError:\n    print("Cannot divide by zero!")`, output: `Cannot divide by zero!` },
-            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ตัวดำเนินการทางตรรกะ", code: `age = 18\nhas_id = True\nif age >= 18 and has_id:\n    print("Allowed to enter")`, output: `Allowed to enter` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "การเพิ่มข้อมูลใน List", code: `colors = ["red", "green", "blue"]\ncolors.append("yellow")\nprint(colors)`, output: `['red', 'green', 'blue', 'yellow']` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "การเรียงลำดับข้อมูลใน List", code: `numbers = [5, 2, 9, 1, 7]\nnumbers.sort()\nprint(numbers)`, output: `[1, 2, 5, 7, 9]` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "Nested List", code: `matrix = [[1, 2], [3, 4]]\nprint(matrix[0][1])`, output: `2` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "List Comprehension", code: `squares = [x**2 for x in range(5)]\nprint(squares)`, output: `[0, 1, 4, 9, 16]` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "Tuple Unpacking", code: `point = (10, 20)\nx, y = point\nprint(x, y)`, output: `10 20` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "Dictionary พื้นฐาน", code: `student = {"name": "Alice", "age": 22, "major": "CS"}\nprint(student["name"])`, output: `Alice` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "การเพิ่มคีย์ใหม่ใน Dictionary", code: `student = {"name": "Bob", "age": 20}\nstudent["gpa"] = 3.5\nprint(student)`, output: `{'name': 'Bob', 'age': 20, 'gpa': 3.5}` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "การวนลูปดึงข้อมูลจาก Dictionary", code: `student = {"name": "Charlie", "age": 21}\nfor key, value in student.items():\n    print(key, ":", value)`, output: `name : Charlie\nage : 21` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "Set และการตัดค่าที่ซ้ำกัน", code: `unique_nums = {1, 2, 2, 3, 3, 3}\nprint(unique_nums)`, output: `{1, 2, 3}` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "การยูเนียน Set", code: `set_a = {1, 2, 3}\nset_b = {3, 4, 5}\nprint(set_a.union(set_b))`, output: `{1, 2, 3, 4, 5}` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "การใช้งาน enumerate", code: `names = ["Anna", "Ben", "Chris"]\nfor index, name in enumerate(names):\n    print(index, name)`, output: `0 Anna\n1 Ben\n2 Chris` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "การรวม List เข้าด้วยกัน", code: `list1 = [1, 2, 3]\nlist2 = [4, 5, 6]\ncombined = list1 + list2\nprint(combined)`, output: `[1, 2, 3, 4, 5, 6]` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "String Slicing", code: `text = "Hello Python"\nprint(text[0:5])`, output: `Hello` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "String Methods (strip และ title)", code: `text = " python programming "\nprint(text.strip().title())`, output: `Python Programming` },
-            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "การเชื่อมสตริงด้วย join", code: `words = ["Python", "is", "awesome"]\nsentence = " ".join(words)\nprint(sentence)`, output: `Python is awesome` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ฟังก์ชันคำนวณพื้นที่", code: `def calculate_area(width, height):\n    return width * height\nprint(calculate_area(5, 10))`, output: `50` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ฟังก์ชันที่มี Default Argument", code: `def power(base, exponent=2):\n    return base ** exponent\nprint(power(3))\nprint(power(2, 3))`, output: `9\n8` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "พารามิเตอร์ไม่จำกัดจำนวน (*args)", code: `def print_names(*names):\n    for name in names:\n        print(name)\nprint_names("Alice", "Bob", "Charlie")`, output: `Alice\nBob\nCharlie` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "Lambda Function", code: `square = lambda x: x ** 2\nprint(square(4))`, output: `16` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "การใช้ map กับ Lambda", code: `numbers = [1, 2, 3, 4]\ndoubled = list(map(lambda x: x * 2, numbers))\nprint(doubled)`, output: `[2, 4, 6, 8]` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "การใช้ filter กับ Lambda", code: `numbers = [1, 2, 3, 4, 5, 6]\nevens = list(filter(lambda x: x % 2 == 0, numbers))\nprint(evens)`, output: `[2, 4, 6]` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "การสร้างคลาสและเมธอดเบื้องต้น", code: `class Dog:\n    def __init__(self, name):\n        self.name = name\n    def bark(self):\n        return self.name + " says Woof!"\nmy_dog = Dog("Buddy")\nprint(my_dog.bark())`, output: `Buddy says Woof!` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "คลาสพร้อมเมธอดแนะนำตัว (f-string)", code: `class Person:\n    def __init__(self, name, age):\n        self.name = name\n        self.age = age\n    def introduce(self):\n        print(f"Hi, I am {self.name} and I am {self.age} years old.")\np = Person("Anna", 25)\np.introduce()`, output: `Hi, I am Anna and I am 25 years old.` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "การเรียกใช้งานโมดูล math", code: `import math\nprint(math.sqrt(16))\nprint(math.pi)`, output: `4.0\n3.141592653589793` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "การใช้งานโมดูล random", code: `import random\nprint(random.randint(1, 10))`, output: `(Random number 1-10)` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "การใช้งานโมดูล datetime", code: `import datetime\nnow = datetime.datetime.now()\nprint("Current year:", now.year)`, output: `Current year: 2026` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "การเขียนไฟล์ข้อความ", code: `with open("sample.txt", "w") as f:\n    f.write("Hello, File!")`, output: `(File sample.txt written successfully)` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "การอ่านไฟล์ข้อความ", code: `with open("sample.txt", "r") as f:\n    content = f.read()\n    print(content)`, output: `Hello, File!` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "การใช้งานโมดูล os", code: `import os\nprint(os.getcwd())`, output: `/current/working/directory` },
-            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ฟังก์ชันเรียกตัวเอง (Factorial)", code: `def factorial(n):\n    if n == 1:\n        return 1\n    return n * factorial(n - 1)\nprint(factorial(5))`, output: `120` }
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 1: การแสดงผลข้อความพื้นฐาน", code: `print("Hello, World")`, output: `Hello, World` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 2: การประกาศตัวแปรและแสดงผล", code: `name = "Python"\nprint("Welcome to " + name)`, output: `Welcome to Python` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 3: การรับค่าจากผู้ใช้", code: `username = input("Enter your name: ")\nprint("Hello, " + username)`, output: `Hello, [username]` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 4: การคำนวณทางคณิตศาสตร์เบื้องต้น", code: `a = 10\nb = 5\nprint("Sum:", a + b)`, output: `Sum: 15` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 5: เงื่อนไข if-else พื้นฐาน", code: `score = 75\nif score >= 50:\n    print("Passed")\nelse:\n    print("Failed")`, output: `Passed` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 6: การใช้ลูป for วนซ้ำตามช่วงตัวเลข", code: `for i in range(1, 6):\n    print("Number:", i)`, output: `Number: 1\nNumber: 2\nNumber: 3\nNumber: 4\nNumber: 5` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 7: การใช้ลูป while", code: `count = 3\nwhile count > 0:\n    print(count)\n    count -= 1\nprint("Liftoff!")`, output: `3\n2\n1\nLiftoff!` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 8: การสร้างและใช้งาน List", code: `fruits = ["apple", "banana", "cherry"]\nprint(fruits[1])`, output: `banana` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 9: การสร้างฟังก์ชันเบื้องต้น", code: `def greet(person):\n    return "Hello, " + person\nprint(greet("Somchai"))`, output: `Hello, Somchai` },
+            { category: "หมวดที่ 1: แสดงผลและตัวแปร", title: "ข้อ 10: การแปลงชนิดข้อมูล (Type Conversion)", code: `birth_year = input("Enter birth year: ")\nage = 2026 - int(birth_year)\nprint("You are approximately", age, "years old.")`, output: `You are approximately [age] years old.` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 11: เงื่อนไขแบบหลายทางเลือก", code: `temperature = 30\nif temperature > 35:\n    print("Very hot")\nelif temperature >= 25:\n    print("Warm")\nelse:\n    print("Cool")`, output: `Warm` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 12: ตรวจสอบเลขคู่และเลขคี่", code: `num = int(input("Enter an integer: "))\nif num % 2 == 0:\n    print("Even number")\nelse:\n    print("Odd number")`, output: `Even number` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 13: Conditional Expression", code: `x = 10\ny = 20\nmaximum = x if x > y else y\nprint("Max is:", maximum)`, output: `Max is: 20` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 14: ลูปตรวจสอบรหัสผ่าน", code: `password = ""\nwhile password != "secret":\n    password = input("Enter password: ")\nprint("Access Granted!")`, output: `Access Granted!` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 15: วนลูปแสดงตัวอักษรในสตริง", code: `for char in "Python":\n    print(char)`, output: `P\ny\nt\nh\no\nn` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 16: การใช้งานคำสั่ง break", code: `for i in range(1, 11):\n    if i == 6:\n        break\n    print(i)`, output: `1\n2\n3\n4\n5` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 17: การใช้งานคำสั่ง continue", code: `for i in range(1, 6):\n    if i == 3:\n        continue\n    print(i)`, output: `1\n2\n4\n5` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 18: Nested Loop", code: `for i in range(2):\n    for j in range(2):\n        print(i, j)`, output: `0 0\n0 1\n1 0\n1 1` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 19: การจัดการข้อผิดพลาด (try-except)", code: `try:\n    val = int(input("Enter a number: "))\n    print(10 / val)\nexcept ZeroDivisionError:\n    print("Cannot divide by zero!")`, output: `Cannot divide by zero!` },
+            { category: "หมวดที่ 2: โครงสร้างควบคุม", title: "ข้อ 20: ตัวดำเนินการทางตรรกะ", code: `age = 18\nhas_id = True\nif age >= 18 and has_id:\n    print("Allowed to enter")`, output: `Allowed to enter` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 21: การเพิ่มข้อมูลใน List", code: `colors = ["red", "green", "blue"]\ncolors.append("yellow")\nprint(colors)`, output: `['red', 'green', 'blue', 'yellow']` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 22: การเรียงลำดับข้อมูลใน List", code: `numbers = [5, 2, 9, 1, 7]\nnumbers.sort()\nprint(numbers)`, output: `[1, 2, 5, 7, 9]` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 23: Nested List", code: `matrix = [[1, 2], [3, 4]]\nprint(matrix[0][1])`, output: `2` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 24: List Comprehension", code: `squares = [x**2 for x in range(5)]\nprint(squares)`, output: `[0, 1, 4, 9, 16]` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 25: Tuple Unpacking", code: `point = (10, 20)\nx, y = point\nprint(x, y)`, output: `10 20` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 26: Dictionary พื้นฐาน", code: `student = {"name": "Alice", "age": 22, "major": "CS"}\nprint(student["name"])`, output: `Alice` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 27: การเพิ่มคีย์ใหม่ใน Dictionary", code: `student = {"name": "Bob", "age": 20}\nstudent["gpa"] = 3.5\nprint(student)`, output: `{'name': 'Bob', 'age': 20, 'gpa': 3.5}` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 28: การวนลูปดึงข้อมูลจาก Dictionary", code: `student = {"name": "Charlie", "age": 21}\nfor key, value in student.items():\n    print(key, ":", value)`, output: `name : Charlie\nage : 21` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 29: Set และการตัดค่าที่ซ้ำกัน", code: `unique_nums = {1, 2, 2, 3, 3, 3}\nprint(unique_nums)`, output: `{1, 2, 3}` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 30: การยูเนียน Set", code: `set_a = {1, 2, 3}\nset_b = {3, 4, 5}\nprint(set_a.union(set_b))`, output: `{1, 2, 3, 4, 5}` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 31: การใช้งาน enumerate", code: `names = ["Anna", "Ben", "Chris"]\nfor index, name in enumerate(names):\n    print(index, name)`, output: `0 Anna\n1 Ben\n2 Chris` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 32: การรวม List เข้าด้วยกัน", code: `list1 = [1, 2, 3]\nlist2 = [4, 5, 6]\ncombined = list1 + list2\nprint(combined)`, output: `[1, 2, 3, 4, 5, 6]` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 33: String Slicing", code: `text = "Hello Python"\nprint(text[0:5])`, output: `Hello` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 34: String Methods (strip และ title)", code: `text = " python programming "\nprint(text.strip().title())`, output: `Python Programming` },
+            { category: "หมวดที่ 3: โครงสร้างข้อมูล", title: "ข้อ 35: การเชื่อมสตริงด้วย join", code: `words = ["Python", "is", "awesome"]\nsentence = " ".join(words)\nprint(sentence)`, output: `Python is awesome` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 36: ฟังก์ชันคำนวณพื้นที่", code: `def calculate_area(width, height):\n    return width * height\nprint(calculate_area(5, 10))`, output: `50` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 37: ฟังก์ชันที่มี Default Argument", code: `def power(base, exponent=2):\n    return base ** exponent\nprint(power(3))\nprint(power(2, 3))`, output: `9\n8` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 38: พารามิเตอร์ไม่จำกัดจำนวน (*args)", code: `def print_names(*names):\n    for name in names:\n        print(name)\nprint_names("Alice", "Bob", "Charlie")`, output: `Alice\nBob\nCharlie` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 39: Lambda Function", code: `square = lambda x: x ** 2\nprint(square(4))`, output: `16` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 40: การใช้ map กับ Lambda", code: `numbers = [1, 2, 3, 4]\ndoubled = list(map(lambda x: x * 2, numbers))\nprint(doubled)`, output: `[2, 4, 6, 8]` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 41: การใช้ filter กับ Lambda", code: `numbers = [1, 2, 3, 4, 5, 6]\nevens = list(filter(lambda x: x % 2 == 0, numbers))\nprint(evens)`, output: `[2, 4, 6]` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 42: การสร้างคลาสและเมธอดเบื้องต้น", code: `class Dog:\n    def __init__(self, name):\n        self.name = name\n    def bark(self):\n        return self.name + " says Woof!"\nmy_dog = Dog("Buddy")\nprint(my_dog.bark())`, output: `Buddy says Woof!` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 43: คลาสพร้อมเมธอดแนะนำตัว (f-string)", code: `class Person:\n    def __init__(self, name, age):\n        self.name = name\n        self.age = age\n    def introduce(self):\n        print(f"Hi, I am {self.name} and I am {self.age} years old.")\np = Person("Anna", 25)\np.introduce()`, output: `Hi, I am Anna and I am 25 years old.` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 44: การเรียกใช้งานโมดูล math", code: `import math\nprint(math.sqrt(16))\nprint(math.pi)`, output: `4.0\n3.141592653589793` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 45: การใช้งานโมดูล random", code: `import random\nprint(random.randint(1, 10))`, output: `(Random number 1-10)` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 46: การใช้งานโมดูล datetime", code: `import datetime\nnow = datetime.datetime.now()\nprint("Current year:", now.year)`, output: `Current year: 2026` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 47: การเขียนไฟล์ข้อความ", code: `with open("sample.txt", "w") as f:\n    f.write("Hello, File!")`, output: `(File sample.txt written successfully)` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 48: การอ่านไฟล์ข้อความ", code: `with open("sample.txt", "r") as f:\n    content = f.read()\n    print(content)`, output: `Hello, File!` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 49: การใช้งานโมดูล os", code: `import os\nprint(os.getcwd())`, output: `/current/working/directory` },
+            { category: "หมวดที่ 4: ฟังก์ชันและคลาส", title: "ข้อ 50: ฟังก์ชันเรียกตัวเอง (Factorial)", code: `def factorial(n):\n    if n == 1:\n        return 1\n    return n * factorial(n - 1)\nprint(factorial(5))`, output: `120` }
         ];
 
-        let remainingIndices = Array.from({length: pythonSnippets.length}, (_, i) => i);
-        
-        function getNextRandomIndex() {
-            if (remainingIndices.length === 0) {
-                remainingIndices = Array.from({length: pythonSnippets.length}, (_, i) => i);
-            }
-            const randPos = Math.floor(Math.random() * remainingIndices.length);
-            const chosenIndex = remainingIndices[randPos];
-            remainingIndices.splice(randPos, 1);
-            return chosenIndex;
-        }
-
-        let snippetIndex = getNextRandomIndex();
+        let snippetIndex = 0;
         let currentItem = pythonSnippets[snippetIndex];
         let sampleText = currentItem.code;
         
@@ -977,29 +1082,23 @@
         let appActive = false;
         let statsInterval = null;
 
+        // == ตัวแปรสำหรับระบบ AFK ==
         let afkTimer = null;
-        const AFK_DELAY = 10000;
+        const AFK_DELAY = 10000; // 10 วินาที
         let afkStartTime = 0;    
         const afkModal = document.getElementById('afkModal');
-        const afkContent = document.getElementById('afkContent');
+        const resumeAfkBtn = document.getElementById('resumeAfkBtn');
 
         const introScreen = document.getElementById('introScreen');
-        const introContainer = document.getElementById('introContainer');
         const menuScreen = document.getElementById('menuScreen');
-        const terminalBox = document.getElementById('terminalBox');
         const optionsModal = document.getElementById('optionsModal');
-        const optionsContent = document.getElementById('optionsContent');
         const chapterModal = document.getElementById('chapterModal');
-        const chapterContent = document.getElementById('chapterContent');
         const appScreen = document.getElementById('appScreen');
         const targetBox = document.getElementById('targetBox');
         const keyboardBox = document.getElementById('keyboard');
         const screenFlashOverlay = document.getElementById('screenFlashOverlay');
         const outputText = document.getElementById('outputText');
-        
         const nextStepBtn = document.getElementById('nextStepBtn');
-        const randomStepBtn = document.getElementById('randomStepBtn');
-        
         const statsPanelRight = document.getElementById('statsPanelRight');
         const snippetBadge = document.getElementById('snippetBadge');
         const chapterListContainer = document.getElementById('chapterListContainer');
@@ -1034,7 +1133,10 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: { duration: 400, easing: 'easeOutQuart' },
+                animation: {
+                    duration: 400,
+                    easing: 'easeOutQuart'
+                },
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -1047,7 +1149,9 @@
                         ticks: { color: '#888', font: { size: 9 }, maxTicksLimit: 8 }
                     }
                 },
-                plugins: { legend: { display: false } }
+                plugins: {
+                    legend: { display: false }
+                }
             }
         });
 
@@ -1065,30 +1169,16 @@
             statsChart.update();
         }
 
-        // ใช้ GSAP Floating UI Effect
-        gsap.to(introContainer, { y: -12, rotation: 0.35, duration: 3, repeat: -1, yoyo: true, ease: "sine.inOut" });
-        gsap.to(terminalBox, { y: -10, rotation: 0.25, duration: 3.5, repeat: -1, yoyo: true, ease: "sine.inOut" });
-        gsap.to(afkContent, { y: -10, rotation: 0.25, duration: 3, repeat: -1, yoyo: true, ease: "sine.inOut" });
-
         function showAfkModal() {
-            if (introScreen.style.display === 'none' || introScreen.classList.contains('hide') || isDone) return;
-            gsap.set(afkModal, { display: 'flex', opacity: 0, visibility: 'visible' });
-            gsap.fromTo(afkContent, { scale: 0.8, y: 20 }, { scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" });
-            gsap.to(afkModal, { opacity: 1, duration: 0.3 });
+            if (!introScreen.classList.contains('hide') || isDone) return;
+            afkModal.classList.add('show');
             if (isStarted) {
                 afkStartTime = new Date().getTime();
             }
         }
 
         function hideAfkModal() {
-            if (gsap.getProperty(afkModal, "opacity") === 0) return;
-            gsap.to(afkModal, {
-                opacity: 0,
-                duration: 0.3,
-                onComplete: () => {
-                    gsap.set(afkModal, { display: 'none', visibility: 'hidden' });
-                }
-            });
+            afkModal.classList.remove('show');
             if (isStarted && afkStartTime > 0) {
                 const afkDuration = new Date().getTime() - afkStartTime;
                 startTime += afkDuration;
@@ -1099,7 +1189,7 @@
 
         function resetAfkTimer() {
             clearTimeout(afkTimer);
-            if (gsap.getProperty(afkModal, "opacity") === 0 || !gsap.getProperty(afkModal, "opacity")) {
+            if (!afkModal.classList.contains('show')) {
                 afkTimer = setTimeout(showAfkModal, AFK_DELAY);
             }
         }
@@ -1107,11 +1197,11 @@
         ['mousemove', 'mousedown', 'touchstart', 'click'].forEach(evt => {
             window.addEventListener(evt, resetAfkTimer);
         });
-        
-        afkModal.addEventListener('click', hideAfkModal);
+
+        resumeAfkBtn.addEventListener('click', hideAfkModal);
 
         function runIntroTypingEffect() {
-            const titleText = "The Non-Deterministic Quantum-Disrupted Deep-Fried Neuro-Spaghetti Chaos-Generator Ecosystem with Ultra-Smooth Premium Crash-On-Launch Capabilities Pro MaxThe Over-Engineered Multi-Layered Cybernetic Bug-Production Pipeline Optimized Specifically for Professional Corporate Blame-Shifting UltimateThe StackOverflow-Blessed Custom-Tailored AI-Driven Procrastination Framework with Integrated High-Performance Emotional Damage EngineThe Hyper-Asynchronous Crypto-Infused Pseudo-Smooth Error-Ingestion Matrix That Confidently Works Only on My Local Machine SmoothThe Zero-Knowledge Bio-Digital Glitch-Prone Garbage-Collection Nexus Elegantly Designed to Mysteriously Break Down During Live Demos CustomThe Infinite-Looping Cloud-Native Micro-Spaghetti Architecture with Fully-Automated AI-Generated Excuses for Constant System Downtime UltraThe Hard-Coded Sub-Optimal Dynamically-Typed Visual-Disaster Framework Powered by Pure Caffeine and Total Desperation LayerThe Semi-Functional Pseudo-Intelligent Cyber-Garbage Metamorphic Transformer with Custom Over-Promised Under-Delivered Marketing Claims SmoothThe Unoptimized Multi-Threaded Memory-Leak Simulation Matrix to Ensure Your Expensive Computer Completely Freezes Within Five Seconds ProThe Sub-Atomic Copy-Paste Architecture and Custom Fully-Customized Anti-Syllabus Feature Set with Ultimate Smooth Failure Rates Max";
+            const titleText = "-PYTYPE-";
             const titleElem = document.getElementById('introTitle');
             titleElem.innerHTML = '';
             let i = 0;
@@ -1136,18 +1226,8 @@
 
         function enterSystem() {
             initAudioContext();
-            gsap.to(introScreen, {
-                opacity: 0,
-                duration: 0.6,
-                ease: "power2.inOut",
-                onComplete: () => {
-                    introScreen.classList.add('hide');
-                    introScreen.style.display = 'none';
-                    gsap.set(menuScreen, { display: 'flex', opacity: 0, visibility: 'visible' });
-                    gsap.fromTo(terminalBox, { scale: 0.9, y: 30 }, { scale: 1, y: 0, duration: 0.5, ease: "back.out(1.7)" });
-                    gsap.to(menuScreen, { opacity: 1, duration: 0.4 });
-                }
-            });
+            introScreen.classList.add('hide');
+            menuScreen.classList.remove('hide');
             resetAfkTimer();
         }
 
@@ -1160,7 +1240,6 @@
         document.getElementById('closeChapterBtn').addEventListener('click', closeChapterModal);
         document.getElementById('menuBackBtn').addEventListener('click', backToMenu);
         document.getElementById('nextStepBtn').addEventListener('click', nextSnippet);
-        document.getElementById('randomStepBtn').addEventListener('click', randomSnippet);
 
         document.getElementById('themeSelect').addEventListener('change', function() { 
             handleThemeChange(this); 
@@ -1207,38 +1286,17 @@
             }
         }
 
-        function openOptions() {
-            gsap.set(optionsModal, { display: 'flex', opacity: 0, visibility: 'visible' });
-            gsap.fromTo(optionsContent, { scale: 0.9, y: 20 }, { scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" });
-            gsap.to(optionsModal, { opacity: 1, duration: 0.3 });
-        }
-
-        function closeOptions() {
-            gsap.to(optionsModal, {
-                opacity: 0,
-                duration: 0.3,
-                onComplete: () => {
-                    gsap.set(optionsModal, { display: 'none', visibility: 'hidden' });
-                }
-            });
-        }
+        function openOptions() { optionsModal.classList.add('show'); }
+        function closeOptions() { optionsModal.classList.remove('show'); }
 
         function openChapterModal() {
             initAudioContext();
             renderChapterList();
-            gsap.set(chapterModal, { display: 'flex', opacity: 0, visibility: 'visible' });
-            gsap.fromTo(chapterContent, { scale: 0.9, y: 20 }, { scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" });
-            gsap.to(chapterModal, { opacity: 1, duration: 0.3 });
+            chapterModal.classList.add('show');
         }
 
         function closeChapterModal() {
-            gsap.to(chapterModal, {
-                opacity: 0,
-                duration: 0.3,
-                onComplete: () => {
-                    gsap.set(chapterModal, { display: 'none', visibility: 'hidden' });
-                }
-            });
+            chapterModal.classList.remove('show');
         }
 
         function renderChapterList() {
@@ -1274,13 +1332,10 @@
 
                     btn.addEventListener('click', () => {
                         snippetIndex = item.index;
-                        const idxInRemaining = remainingIndices.indexOf(snippetIndex);
-                        if (idxInRemaining > -1) remainingIndices.splice(idxInRemaining, 1);
-
                         currentItem = pythonSnippets[snippetIndex];
                         sampleText = currentItem.code;
                         closeChapterModal();
-                        if (gsap.getProperty(appScreen, "opacity") === 0) {
+                        if (!appScreen.classList.contains('active')) {
                             startApp();
                         } else {
                             resetGame();
@@ -1395,30 +1450,20 @@
             charSpan.className = 'matrix-bg-char';
             charSpan.innerText = chars[Math.floor(Math.random() * chars.length)];
             charSpan.style.left = Math.random() * window.innerWidth + 'px';
-            document.body.appendChild(charSpan);
-
             const duration = Math.random() * 4 + 6;
+            charSpan.style.animationDuration = duration + 's';
             const charChangeInterval = setInterval(() => { charSpan.innerText = chars[Math.floor(Math.random() * chars.length)]; }, 100);
-            
-            gsap.fromTo(charSpan, { y: -30, opacity: 0.7 }, {
-                y: window.innerHeight + 50,
-                opacity: 0,
-                duration: duration,
-                ease: "none",
-                onComplete: () => {
-                    clearInterval(charChangeInterval);
-                    charSpan.remove();
-                }
-            });
+            document.body.appendChild(charSpan);
+            setTimeout(() => { clearInterval(charChangeInterval); charSpan.remove(); }, duration * 1000);
         }
         setInterval(createMatrixBackgroundChar, 180);
 
         function initText() {
             targetBox.innerHTML = "";
             outputText.innerText = ": Waiting for input...";
-            gsap.set(nextStepBtn, { autoAlpha: 0, y: 20 });
+            nextStepBtn.classList.remove('show');
             statsPanelRight.classList.remove('show');
-            snippetBadge.innerText = `Payload ${snippetIndex + 1}: ${currentItem.title}`;
+            snippetBadge.innerText = `ข้อที่ ${snippetIndex + 1}/50: ${currentItem.title}`;
 
             for (let i = 0; i < sampleText.length; i++) {
                 const span = document.createElement('span');
@@ -1439,31 +1484,17 @@
         function startApp() {
             optionsModal.classList.remove('show');
             chapterModal.classList.remove('show');
-            gsap.to(menuScreen, {
-                opacity: 0,
-                duration: 0.4,
-                onComplete: () => {
-                    menuScreen.style.display = 'none';
-                    gsap.set(appScreen, { display: 'flex', opacity: 0, visibility: 'visible' });
-                    gsap.to(appScreen, { opacity: 1, duration: 0.5 });
-                    appActive = true;
-                    resetGame();
-                }
-            });
+            menuScreen.classList.add('hide');
+            appScreen.classList.add('active');
+            appActive = true;
+            resetGame();
         }
 
         function backToMenu() {
             stopTimer();
-            gsap.to(appScreen, {
-                opacity: 0,
-                duration: 0.4,
-                onComplete: () => {
-                    appScreen.style.display = 'none';
-                    gsap.set(menuScreen, { display: 'flex', opacity: 0, visibility: 'visible' });
-                    gsap.to(menuScreen, { opacity: 1, duration: 0.4 });
-                    appActive = false;
-                }
-            });
+            appScreen.classList.remove('active');
+            menuScreen.classList.remove('hide');
+            appActive = false;
         }
 
         function exitApp() {
@@ -1477,7 +1508,6 @@
                 startTime = new Date().getTime(); 
                 resetChartData();
                 statsPanelRight.classList.add('show');
-                gsap.fromTo(statsPanelRight, { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power2.out" });
                 if (statsInterval) clearInterval(statsInterval);
                 statsInterval = setInterval(updateLiveStats, 500);
             }
@@ -1530,11 +1560,15 @@
         }
 
         function triggerErrorFlash() {
-            gsap.killTweensOf([document.body, targetBox, keyboardBox, screenFlashOverlay]);
-            gsap.fromTo(document.body, { x: 0 }, { x: 6, duration: 0.05, repeat: 5, yoyo: true, ease: "power1.inOut" });
-            gsap.fromTo(targetBox, { backgroundColor: "rgba(255, 0, 0, 0.22)" }, { backgroundColor: "rgba(13, 20, 16, 0.45)", duration: 0.3 });
-            gsap.fromTo(keyboardBox, { backgroundColor: "rgba(255, 0, 0, 0.22)" }, { backgroundColor: "rgba(13, 20, 16, 0.45)", duration: 0.3 });
-            gsap.fromTo(screenFlashOverlay, { backgroundColor: "rgba(255, 0, 0, 0.28)" }, { backgroundColor: "rgba(255, 0, 0, 0)", duration: 0.3 });
+            document.body.classList.remove('shake-effect');
+            targetBox.classList.remove('red-flash-effect');
+            keyboardBox.classList.remove('red-flash-effect');
+            screenFlashOverlay.classList.remove('screen-flash-active');
+            void document.body.offsetWidth;
+            document.body.classList.add('shake-effect');
+            targetBox.classList.add('red-flash-effect');
+            keyboardBox.classList.add('red-flash-effect');
+            screenFlashOverlay.classList.add('screen-flash-active');
         }
 
         function createFallingChar(char, isCorrect, targetElement) {
@@ -1545,24 +1579,16 @@
             fallingDiv.style.color = isCorrect ? getComputedStyle(document.body).getPropertyValue('--theme-color').trim() : '#ff6b6b';
 
             const rect = targetElement.getBoundingClientRect();
+            fallingDiv.style.left = (rect.left + rect.width / 2) + 'px';
+            fallingDiv.style.top = (rect.top + rect.height / 2) + 'px';
+
+            const randomX = (Math.random() - 0.5) * 300 + 'px';
+            const randomRot = (Math.random() - 0.5) * 720 + 'deg';
+            fallingDiv.style.setProperty('--rand-x', randomX);
+            fallingDiv.style.setProperty('--rand-rot', randomRot);
+
             document.body.appendChild(fallingDiv);
-
-            const randomX = (Math.random() - 0.5) * 300;
-            const randomRot = (Math.random() - 0.5) * 720;
-
-            gsap.fromTo(fallingDiv, 
-                { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, scale: 1, opacity: 1, rotation: 0 },
-                { 
-                    x: rect.left + rect.width / 2 + randomX, 
-                    y: rect.top + rect.height / 2 + 350, 
-                    scale: 0.5, 
-                    opacity: 0, 
-                    rotation: randomRot,
-                    duration: 1, 
-                    ease: "power1.out",
-                    onComplete: () => fallingDiv.remove()
-                }
-            );
+            setTimeout(() => fallingDiv.remove(), 1000);
         }
 
         function executeCode() {
@@ -1589,41 +1615,24 @@
             statAccuracy.innerText = `${accuracy}%`;
 
             statsPanelRight.classList.add('show');
-            gsap.to(nextStepBtn, { autoAlpha: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" });
+            nextStepBtn.classList.add('show');
         }
 
         function nextSnippet() {
-            gsap.to(targetBox, {
-                scale: 0.98,
-                opacity: 0.4,
-                duration: 0.15,
-                onComplete: () => {
-                    snippetIndex = getNextRandomIndex();
-                    currentItem = pythonSnippets[snippetIndex];
-                    sampleText = currentItem.code;
-                    resetGame();
-                    gsap.to(targetBox, { scale: 1, opacity: 1, duration: 0.15 });
-                }
-            });
-        }
-
-        function randomSnippet() {
-            gsap.to(targetBox, {
-                scale: 0.98,
-                opacity: 0.4,
-                duration: 0.15,
-                onComplete: () => {
-                    snippetIndex = getNextRandomIndex();
-                    currentItem = pythonSnippets[snippetIndex];
-                    sampleText = currentItem.code;
-                    resetGame();
-                    gsap.to(targetBox, { scale: 1, opacity: 1, duration: 0.15 });
-                }
-            });
+            targetBox.style.transform = 'scale(0.98)';
+            targetBox.style.opacity = '0.4';
+            setTimeout(() => {
+                snippetIndex = (snippetIndex + 1) % pythonSnippets.length;
+                currentItem = pythonSnippets[snippetIndex];
+                sampleText = currentItem.code;
+                resetGame();
+                targetBox.style.transform = 'scale(1)';
+                targetBox.style.opacity = '1';
+            }, 150);
         }
 
         window.addEventListener('keydown', (e) => {
-            if (gsap.getProperty(afkModal, "opacity") > 0) {
+            if (afkModal.classList.contains('show')) {
                 if (e.key === 'Enter' || e.code === 'Space' || e.key === 'Escape') {
                     hideAfkModal();
                 }
@@ -1638,7 +1647,7 @@
                 return;
             }
 
-            if (introScreen.style.display !== 'none' && !introScreen.classList.contains('hide')) {
+            if (!introScreen.classList.contains('hide')) {
                 if (e.code === 'Space' || e.key === 'Enter') {
                     e.preventDefault();
                     enterSystem();
@@ -1647,7 +1656,7 @@
             }
 
             if (!appActive) return;
-            if (gsap.getProperty(chapterModal, "opacity") > 0 || gsap.getProperty(optionsModal, "opacity") > 0) return;
+            if (chapterModal.classList.contains('show') || optionsModal.classList.contains('show')) return;
 
             let keyElement = document.querySelector(`.key[data-key="${e.code}"]`);
 
@@ -1656,10 +1665,7 @@
                                e.code.startsWith("Alt") || e.code.startsWith("Control");
             
             if (isModifier) {
-                if (keyElement) {
-                    keyElement.classList.add('active-correct');
-                    gsap.to(keyElement, { scale: 0.94, duration: 0.1 });
-                }
+                if (keyElement) keyElement.classList.add('active-correct');
                 return;
             }
 
@@ -1698,10 +1704,7 @@
                         outputText.innerText = `: Ready to execute. Press Enter to run code!`;
                     }
                 }
-                if (keyElement) {
-                    keyElement.classList.add('active-correct');
-                    gsap.to(keyElement, { scale: 0.94, duration: 0.1 });
-                }
+                if (keyElement) keyElement.classList.add('active-correct');
                 return;
             }
 
@@ -1716,10 +1719,7 @@
                     charSpans[currentIndex].classList.remove('correct', 'incorrect');
                     charSpans[currentIndex].classList.add('current');
                 }
-                if (keyElement) {
-                    keyElement.classList.add('active-correct');
-                    gsap.to(keyElement, { scale: 0.94, duration: 0.1 });
-                }
+                if (keyElement) keyElement.classList.add('active-correct');
                 return;
             }
 
@@ -1735,7 +1735,6 @@
                 playTypeSound(false);
                 if (keyElement) {
                     keyElement.classList.add('active-incorrect');
-                    gsap.fromTo(keyElement, { scale: 0.92 }, { scale: 1, duration: 0.2 });
                     createFallingChar(inputChar, false, keyElement);
                 }
                 return;
@@ -1763,20 +1762,14 @@
                     outputText.innerText = `: Ready to execute. Press Enter to run code!`;
                 }
 
-                if (keyElement) {
-                    keyElement.classList.add('active-correct');
-                    gsap.to(keyElement, { scale: 0.94, duration: 0.1 });
-                }
+                if (keyElement) keyElement.classList.add('active-correct');
             } else {
                 activeSpan.classList.remove('current');
                 activeSpan.classList.add('incorrect');
                 
                 playTypeSound(false);
                 createFallingChar(inputChar === '\n' ? 'Enter' : inputChar, false, activeSpan);
-                if (keyElement) {
-                    keyElement.classList.add('active-incorrect');
-                    gsap.fromTo(keyElement, { scale: 0.92 }, { scale: 1, duration: 0.2 });
-                }
+                if (keyElement) keyElement.classList.add('active-incorrect');
 
                 incorrectCount++;
                 hasErrorInCurrentPos = true;
@@ -1791,7 +1784,6 @@
             const keyElement = document.querySelector(`.key[data-key="${e.code}"]`);
             if (keyElement) {
                 keyElement.classList.remove('active-correct', 'active-incorrect');
-                gsap.to(keyElement, { scale: 1, duration: 0.15 });
             }
         });
     </script>
