@@ -815,7 +815,6 @@
     </style>
 </head>
 <body>
-    <!-- Click-to-Enter Intro Overlay -->
     <div class="intro-screen" id="introScreen">
         <div class="click-enter-container floating-ui">
             <h1 id="introTitle"></h1>
@@ -838,7 +837,6 @@
         </div>
     </div>
 
-    <!-- Options Modal -->
     <div class="options-modal" id="optionsModal">
         <div class="options-content">
             <h2>// KERNEL_CONFIG & THEME</h2>
@@ -887,10 +885,10 @@
         </div>
     </div>
 
-    <!-- Chapter & Snippet Selection Modal (Ctrl + H) -->
+    <!-- Chapter & Snippet Selection Modal (Alt + H) -->
     <div class="options-modal" id="chapterModal">
         <div class="options-content" style="width: 580px; max-height: 82vh; display: flex; flex-direction: column;">
-            <h2>// SELECT PAYLOAD & CHAPTER (Ctrl+H)</h2>
+            <h2>// SELECT PAYLOAD & CHAPTER (Alt+H)</h2>
             <div id="chapterListContainer" style="overflow-y: auto; max-height: 52vh; padding-right: 8px; margin-bottom: 20px;">
                 <!-- Populated dynamically -->
             </div>
@@ -968,7 +966,7 @@
                     <div class="key" data-key="KeyP">P</div>
                     <div class="key" data-key="BracketLeft">[</div>
                     <div class="key" data-key="BracketRight">]</div>
-                    <div class="key" data-key="Backslash">\\</div>
+                    <div class="key" data-key="Backslash">\</div>
                 </div>
                 <div class="row">
                     <div class="key caps" data-key="CapsLock">Caps</div>
@@ -1002,14 +1000,16 @@
                 <div class="row">
                     <div class="key" data-key="Fn" id="macFn" style="display: none; min-width: 45px;">Fn</div>
                     <div class="key" data-key="ControlLeft" id="bottomKey1">Ctrl</div>
-    <!-- Chapter & Snippet Selection Modal (Alt + H) -->
-    <div class="options-modal" id="chapterModal">
-        <div class="options-content" style="width: 580px; max-height: 82vh; display: flex; flex-direction: column;">
-            <h2>// SELECT PAYLOAD & CHAPTER (Alt+H)</h2>
-            <div id="chapterListContainer" style="overflow-y: auto; max-height: 52vh; padding-right: 8px; margin-bottom: 20px;">
-                <!-- Populated dynamically -->
+                    <div class="key" data-key="MetaLeft" id="macCmdLeft" style="display: none; min-width: 45px;">⌘</div>
+                    <div class="key" data-key="AltLeft" id="bottomKey2">Alt</div>
+                    <div class="key" data-key="MetaLeft" id="bottomKey4" style="min-width: 45px;">Win</div>
+                    <div class="key space" data-key="Space"></div>
+                    <div class="key" data-key="AltRight" id="bottomKey3">Alt</div>
+                    <div class="key" data-key="MetaRight" id="macCmdRight" style="display: none; min-width: 45px;">⌘</div>
+                    <div class="key" data-key="ContextMenu">Menu</div>
+                    <div class="key" data-key="ControlRight">Ctrl</div>
+                </div>
             </div>
-            <button class="close-opt-btn" id="closeChapterBtn">[ CLOSE & RETURN ]</button>
         </div>
     </div>
 
@@ -1113,7 +1113,6 @@
         const statCps = document.getElementById('statCps');
         const statAccuracy = document.getElementById('statAccuracy');
 
-        // == ตั้งค่า Chart.js พร้อมอนิเมชั่นกราฟแบบ Smooth ==
         const chartCtx = document.getElementById('statsChart').getContext('2d');
         const statsChart = new Chart(chartCtx, {
             type: 'line',
@@ -1164,14 +1163,12 @@
             statsChart.update();
         }
 
-        // ==== ฟังก์ชันรีเซ็ตและล้างกราฟเมื่อเริ่มข้อใหม่ ====
         function resetChartData() {
             statsChart.data.labels = [];
             statsChart.data.datasets[0].data = [];
             statsChart.update();
         }
 
-        // ==== ฟังก์ชันระบบ AFK ====
         function showAfkModal() {
             if (!introScreen.classList.contains('hide') || isDone) return;
             afkModal.classList.add('show');
@@ -1505,15 +1502,14 @@
             setTimeout(() => { window.location.href = "about:blank"; }, 100);
         }
 
-        // == ฟังก์ชันเริ่มจับเวลาและแสดง STATS_LOG พร้อมบันทึกกราฟแบบ Real-time ทีละช่วงเวลา ==
         function startTimer() {
             if (!isStarted) { 
                 isStarted = true; 
                 startTime = new Date().getTime(); 
-                resetChartData(); // เคลียร์และเริ่มกราฟใหม่สำหรับข้อนี้ทันทีที่พิมพ์
-                statsPanelRight.classList.add('show'); // แสดงแผงสถิติทันที
+                resetChartData();
+                statsPanelRight.classList.add('show');
                 if (statsInterval) clearInterval(statsInterval);
-                statsInterval = setInterval(updateLiveStats, 500); // อัปเดตสถิติและจุดกราฟทุก 0.5 วินาที
+                statsInterval = setInterval(updateLiveStats, 500);
             }
         }
 
@@ -1542,11 +1538,9 @@
             statCps.innerText = `${cps} CPS`;
             statAccuracy.innerText = `${accuracy}%`;
 
-            // บันทึกข้อมูลลงกราฟแบบ Real-time ต่อเนื่องในข้อปัจจุบัน
             statsChart.data.labels.push(`${totalSeconds}s`);
             statsChart.data.datasets[0].data.push(wpm);
             
-            // จำกัดจำนวนจุดบนกราฟไม่ให้ล้นเกินไป
             if (statsChart.data.labels.length > 25) {
                 statsChart.data.labels.shift();
                 statsChart.data.datasets[0].data.shift();
@@ -1561,7 +1555,7 @@
             incorrectCount = 0;
             hasErrorInCurrentPos = false;
             isDone = false;
-            resetChartData(); // ล้างข้อมูลกราฟเก่าทันทีเมื่อเริ่มข้อใหม่
+            resetChartData();
             initText();
         }
 
@@ -1731,7 +1725,6 @@
 
             if (currentIndex >= sampleText.length) return;
 
-            // เริ่มจับสถิติทันทีที่กดพิมพ์ตัวอักษรแรก (รวมถึงตัวที่พิมพ์ผิดด้วย)
             startTimer();
 
             let inputChar = e.key;
