@@ -928,7 +928,7 @@
         <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
             <h1 class="main-title">Python Syntax Typing Test</h1>
             <div class="snippet-badge" id="snippetBadge">ข้อที่ 1/50: หมวดที่ 1</div>
-            <div class="instructions">พิมพ์คำสั่ง Python ตามโจทย์ด้านล่างให้ถูกต้องทุกตัวอักษร (กด Tab เพื่อช่วยข้ามช่องว่าง | กด <strong>Ctrl+H</strong> เพื่อเลือกบทเรียน)</div>
+            <div class="instructions">พิมพ์คำสั่ง Python ตามโจทย์ด้านล่างให้ถูกต้องทุกตัวอักษร (กด Tab เพื่อช่วยข้ามช่องว่าง | กด <strong>Alt+H</strong> เพื่อเลือกบทเรียน)</div>
 
             <div class="target-box" id="targetBox"></div>
 
@@ -1002,14 +1002,14 @@
                 <div class="row">
                     <div class="key" data-key="Fn" id="macFn" style="display: none; min-width: 45px;">Fn</div>
                     <div class="key" data-key="ControlLeft" id="bottomKey1">Ctrl</div>
-                    <div class="key" data-key="AltLeft" id="bottomKey2">Alt</div>
-                    <div class="key" data-key="MetaLeft" id="macCmdLeft" style="display: none; min-width: 50px;">⌘</div>
-                    <div class="key space" data-key="Space">Space</div>
-                    <div class="key" data-key="MetaRight" id="macCmdRight" style="display: none; min-width: 50px;">⌘</div>
-                    <div class="key" data-key="AltRight" id="bottomKey3">Alt</div>
-                    <div class="key" data-key="ControlRight" id="bottomKey4">Ctrl</div>
-                </div>
+    <!-- Chapter & Snippet Selection Modal (Alt + H) -->
+    <div class="options-modal" id="chapterModal">
+        <div class="options-content" style="width: 580px; max-height: 82vh; display: flex; flex-direction: column;">
+            <h2>// SELECT PAYLOAD & CHAPTER (Alt+H)</h2>
+            <div id="chapterListContainer" style="overflow-y: auto; max-height: 52vh; padding-right: 8px; margin-bottom: 20px;">
+                <!-- Populated dynamically -->
             </div>
+            <button class="close-opt-btn" id="closeChapterBtn">[ CLOSE & RETURN ]</button>
         </div>
     </div>
 
@@ -1647,7 +1647,7 @@
             }
             resetAfkTimer();
 
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'h') {
+            if (e.altKey && e.key.toLowerCase() === 'h') {
                 e.preventDefault();
                 openChapterModal();
                 return;
